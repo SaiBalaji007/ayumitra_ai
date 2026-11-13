@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from core.audit import audit
 from core.models import AuditLog
 
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import EmailTokenObtainPairSerializer, RegisterSerializer, UserSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -20,8 +20,9 @@ class RegisterView(generics.CreateAPIView):
 
 
 class ThrottledTokenObtainPairView(TokenObtainPairView):
-    """Login, rate-limited per client to slow password guessing."""
+    """Login (case-insensitive email), rate-limited per client to slow password guessing."""
 
+    serializer_class = EmailTokenObtainPairSerializer
     throttle_scope = "auth"
 
 

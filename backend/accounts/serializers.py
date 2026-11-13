@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -18,7 +21,13 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "email", "password", "first_name", "last_name"]
-        extra_kwargs = {"first_name": {"required": True}, "last_name": {"required": False}}
+        extra_kwargs = {
+            # Our validate_email gives one clear, case-insensitive duplicate message, so drop the
+            # model's default UniqueValidator ("user with this email already exists.").
+            "email": {"validators": []},
+            "first_name": {"required": True, "allow_blank": False},
+            "last_name": {"required": False},
+        }
 
     def validate_email(self, value):
         value = User.objects.normalize_email(value).lower()
@@ -27,10 +36,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        # Run Django's password validators against the would-be user (similarity, length, common).
-        validate_password(attrs["password"], User(email=attrs["email"], first_name=attrs.get("first_name", "")))
+        # Run Django's password validators against the would-be user (similarity, length, common)
+        # and report failures on the password field, where the form shows them.
+        candidate = User(email=attrs["email"], first_name=attrs.get("first_name", ""), last_name=attrs.get("last_name", ""))
+        try:
+            validate_password(attrs["password"], candidate)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)}) from exc
         return attrs
 
     def create(self, validated_data):
         # `username` is required by AbstractUser; mirror the email so it stays unique.
-        return User.objects.create_user(username=validated_data["email"], **validated_data)
+        try:
+            with transaction.atomic():
+                return User.objects.create_user(username=validated_data["email"], **validated_data)
+        except IntegrityError as exc:  # two simultaneous sign-ups with the same email
+            raise serializers.ValidationError({"email": ["An account with this email already exists."]}) from exc
+
+
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Login with the email in any letter case. Accounts are stored lowercased at registration."""
+
+    def validate(self, attrs):
+        attrs[self.username_field] = User.objects.normalize_email(attrs.get(self.username_field, "")).strip().lower()
+        return super().validate(attrs)

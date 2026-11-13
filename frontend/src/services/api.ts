@@ -63,22 +63,7 @@ api.interceptors.response.use(
   },
 )
 
-/** Turn a DRF error response into one readable message. */
-export function apiErrorMessage(err: unknown, fallback = 'Something went wrong. Please try again.') {
-  if (!axios.isAxiosError(err)) return fallback
-  if (!err.response) return 'Cannot reach the server. Check that the backend is running.'
-  const data = err.response.data as Record<string, unknown> | undefined
-  if (data && typeof data === 'object') {
-    if (typeof data.detail === 'string') return data.detail
-    const first = Object.entries(data).find(([k]) => k !== 'code' && k !== 'duplicate_of')
-    if (first) {
-      const [field, value] = first
-      const msg = Array.isArray(value) ? String(value[0]) : String(value)
-      return field === 'non_field_errors' ? msg : `${field.replace(/_/g, ' ')}: ${msg}`
-    }
-  }
-  return fallback
-}
+export { apiErrorMessage } from '@/lib/apiError'
 
 // ---------- Endpoints ----------
 
