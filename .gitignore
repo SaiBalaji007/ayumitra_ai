@@ -1,0 +1,38 @@
+# Secrets
+.env
+*.env.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+
+# Medical data — never commit uploaded documents or vector stores
+backend/private_media/
+backend/staticfiles/
+data/
+
+# Model weights
+*.safetensors
+*.gguf
+*.bin
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+
+# Credentials and certificates
+*.pem
+*.key
+*.p12
+credentials*.json
+
+# Medical documents, datasets and vector stores (never commit real patient data)
+media/
+uploads/
+datasets/
+*chroma*/
+*.sqlite3

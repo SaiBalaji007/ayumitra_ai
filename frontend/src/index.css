@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * AyuMitra brand tokens (shadcn/ui convention).
+ * Palette: midnight navy · teal · mint · white · soft violet.
+ * Components use semantic names (bg-card, text-primary, …) so light/dark swap in one place.
+ */
+:root {
+  --radius: 0.75rem;
+
+  /* Brand constants (same in both themes) */
+  --navy: oklch(0.22 0.05 262);             /* midnight navy */
+  --teal: oklch(0.58 0.11 188);
+  --mint: oklch(0.88 0.09 170);
+  --violet: oklch(0.66 0.13 292);           /* soft violet */
+
+  --background: oklch(0.99 0.004 200);      /* near-white with a cool tint */
+  --foreground: oklch(0.22 0.05 262);       /* navy text */
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.55 0.11 188);          /* teal, AA on white */
+  --primary-foreground: oklch(0.99 0.01 188);
+  --secondary: oklch(0.96 0.012 262);
+  --secondary-foreground: oklch(0.3 0.05 262);
+  --muted: oklch(0.965 0.008 250);
+  --muted-foreground: oklch(0.5 0.03 262);
+  --accent: oklch(0.95 0.04 172);           /* mint wash */
+  --accent-foreground: oklch(0.34 0.07 188);
+
+  --destructive: oklch(0.58 0.2 25);
+  --warning: oklch(0.75 0.15 75);
+  --success: oklch(0.62 0.13 160);
+  --info: oklch(0.58 0.14 292);             /* violet */
+
+  --border: oklch(0.915 0.012 250);
+  --input: oklch(0.89 0.014 250);
+  --ring: oklch(0.55 0.11 188);
+
+  --sidebar: oklch(0.982 0.006 230);
+}
+
+.dark {
+  --background: oklch(0.16 0.035 264);      /* midnight navy */
+  --foreground: oklch(0.96 0.01 240);
+  --card: oklch(0.2 0.04 264);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.04 264);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.76 0.12 178);          /* teal-mint, readable on navy */
+  --primary-foreground: oklch(0.18 0.04 262);
+  --secondary: oklch(0.26 0.04 264);
+  --secondary-foreground: oklch(0.92 0.01 240);
+  --muted: oklch(0.24 0.035 264);
+  --muted-foreground: oklch(0.71 0.03 250);
+  --accent: oklch(0.29 0.05 200);
+  --accent-foreground: oklch(0.9 0.07 170);
+
+  --destructive: oklch(0.66 0.19 25);
+  --warning: oklch(0.8 0.14 80);
+  --success: oklch(0.74 0.13 160);
+  --info: oklch(0.74 0.12 292);
+
+  --border: oklch(0.29 0.04 264);
+  --input: oklch(0.33 0.04 264);
+  --ring: oklch(0.76 0.12 178);
+
+  --sidebar: oklch(0.18 0.038 264);
+}
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-navy: var(--navy);
+  --color-teal: var(--teal);
+  --color-mint: var(--mint);
+  --color-violet: var(--violet);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply scroll-smooth;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* Soft dotted grid used behind hero sections. */
+.bg-grid {
+  background-image: radial-gradient(color-mix(in oklch, var(--foreground) 12%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Light dots for navy brand panels (same in both themes). */
+.bg-grid-light {
+  background-image: radial-gradient(rgb(255 255 255 / 0.35) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
