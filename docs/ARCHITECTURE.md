@@ -12,7 +12,7 @@ Tokens live in `frontend/src/index.css`; components only use semantic token name
 |---|---|
 | Frontend (React + TS) | User experience: landing, dashboard, upload, prescriptions, chat, timeline, exports |
 | Django REST API | Auth (JWT), users, documents, conversations, permissions, orchestration |
-| Application services | PostgreSQL (records), private file storage, Celery + Redis (long jobs) |
+| Application services | SQLite (records), private file storage, Celery + Redis (long jobs) |
 | AI service | OCR (PaddleOCR + Tesseract), NLP (spaCy/scispaCy), RAG (LangChain + LangGraph), ChromaDB |
 | Inference | Qwen2.5-3B-Instruct, 4-bit NF4, on a dedicated GPU host |
 
@@ -20,7 +20,7 @@ Django never runs models in-process. Long work (OCR, analysis) goes through Cele
 
 ## Technology choices
 React + TS + Vite · Tailwind + shadcn/ui · Framer Motion · Recharts · Axios + React Query ·
-Django + DRF · PostgreSQL · JWT · Celery + Redis · Qwen2.5-3B-Instruct (NF4) · all-MiniLM-L6-v2 (baseline) ·
+Django + DRF · SQLite · JWT · Celery + Redis · Qwen2.5-3B-Instruct (NF4) · all-MiniLM-L6-v2 (baseline) ·
 ChromaDB · BM25 · LangChain + LangGraph · cross-encoder reranker · PaddleOCR + Tesseract · PyMuPDF ·
 spaCy + scispaCy · RxNorm.
 
@@ -51,7 +51,12 @@ model version.
 Private patient documents are never in the shared knowledge collections. Every retrieval over personal data is
 filtered by owner at the query layer and enforced again in the API permission layer.
 
-## PostgreSQL entities
+## Database entities (SQLite)
+SQLite is the project database. It needs no server, the schema is plain Django models, and WAL mode
+handles the API and worker sharing the file. Its limit is one writer at a time, which suits this
+project's scale. If many concurrent users ever need it, moving to a server database is a settings
+change plus a data migration; no model changes are needed.
+
 User · PatientProfile · MedicalDocument · DocumentPage · ExtractedReport · LabParameter · Prescription ·
 PrescriptionMedicine · MedicineReference · MedicalFinding · Recommendation · KnowledgeSource · Conversation ·
 ChatMessage · ProcessingTask · AuditLog
@@ -72,7 +77,7 @@ ChatMessage · ProcessingTask · AuditLog
 13. Production: Docker, cloud, persistent storage, GPU inference, HTTPS, monitoring, backups
 
 ## Deployment
-Frontend on Vercel. Django on Render or Azure. Managed PostgreSQL and Redis. ChromaDB on persistent disk (or a managed
+Frontend on Vercel. Django on Render or Azure, with SQLite on a persistent disk (one app instance writes to it) and managed Redis. ChromaDB on persistent disk (or a managed
 vector DB). Qwen on a separate GPU provider, since a normal Render web service can't host it. Encrypted private
 storage with retention and deletion policies. Review DPDP Act obligations for health data.
 

@@ -16,7 +16,9 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/contexts/AuthContext'
-import { getHealth } from '@/services/api'
+import { DocumentStatusBadge } from '@/components/documents/DocumentStatusBadge'
+import { formatBytes, formatDate } from '@/lib/format'
+import { api, documentsApi, getHealth, type Paginated } from '@/services/api'
 import { cn } from '@/lib/utils'
 
 const QUICK_ACTIONS = [
@@ -25,13 +27,17 @@ const QUICK_ACTIONS = [
   { to: '/app/assistant', Icon: MessageSquareText, title: 'Ask the assistant', body: 'Evidence-backed answers' },
 ]
 
-// Counts are zero until document APIs exist (Phase 3–4); then these come from the backend.
-const STATS = [
-  { label: 'Reports analyzed', value: 0, Icon: FileText },
-  { label: 'Prescriptions', value: 0, Icon: Pill },
-  { label: 'Parameters tracked', value: 0, Icon: Activity },
-  { label: 'Questions answered', value: 0, Icon: MessageSquareText },
-]
+/** All counts come from the API. "Reports analyzed" stays 0 until extraction (Phase 4–5) produces reports. */
+function useDashboardData() {
+  const recent = useQuery({ queryKey: ['documents', 'recent'], queryFn: () => documentsApi.list({ page: 1 }) })
+  const labs = useQuery({ queryKey: ['documents', 'count', 'lab_report'], queryFn: () => documentsApi.list({ document_type: 'lab_report' }) })
+  const rx = useQuery({ queryKey: ['documents', 'count', 'prescription'], queryFn: () => documentsApi.list({ document_type: 'prescription' }) })
+  const analyzed = useQuery({
+    queryKey: ['reports', 'count'],
+    queryFn: () => api.get<Paginated<unknown>>('/reports/').then((r) => r.data),
+  })
+  return { recent, labs, rx, analyzed }
+}
 
 function greeting() {
   const h = new Date().getHours()
@@ -58,10 +64,19 @@ function EmptyState({ Icon, title, body, action }: { Icon: typeof FileText; titl
 export default function Dashboard() {
   const { user } = useAuth()
   const health = useQuery({ queryKey: ['health'], queryFn: getHealth, refetchInterval: 60_000 })
+  const { recent, labs, rx, analyzed } = useDashboardData()
+  const docCount = recent.data?.count
+
+  const STATS = [
+    { label: 'Documents', value: docCount, Icon: FileText },
+    { label: 'Lab reports', value: labs.data?.count, Icon: Activity },
+    { label: 'Prescriptions', value: rx.data?.count, Icon: Pill },
+    { label: 'Reports analyzed', value: analyzed.data?.count, Icon: Sparkles },
+  ]
 
   const steps = [
     { done: true, label: 'Create your account' },
-    { done: false, label: 'Upload your first lab report' },
+    { done: (docCount ?? 0) > 0, label: 'Upload your first lab report' },
     { done: false, label: 'Review the extracted parameters' },
     { done: false, label: 'Ask a question about your results' },
   ]
@@ -91,7 +106,7 @@ export default function Dashboard() {
                   <span className="text-xs font-medium sm:text-sm">{label}</span>
                   <Icon className="size-4" />
                 </div>
-                <p className="mt-3 text-3xl font-semibold tabular-nums">{value}</p>
+                <p className="mt-3 text-3xl font-semibold tabular-nums">{value ?? '–'}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -125,12 +140,34 @@ export default function Dashboard() {
             <CardDescription>Reports and prescriptions you've uploaded.</CardDescription>
           </CardHeader>
           <CardContent>
-            <EmptyState
-              Icon={FileText}
-              title="No documents yet"
-              body="Upload a lab report or prescription and its analysis status will appear here."
-              action={{ to: '/app/documents', label: 'Upload a document' }}
-            />
+            {recent.data && recent.data.results.length > 0 ? (
+              <ul className="divide-y">
+                {recent.data.results.slice(0, 5).map((d) => (
+                  <li key={d.id} className="flex items-center gap-3 py-3">
+                    <FileText className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{d.title || d.original_filename}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {d.document_type_display} · {formatBytes(d.file_size)} · {formatDate(d.created_at)}
+                      </p>
+                    </div>
+                    <DocumentStatusBadge status={d.status} label={d.status_display} />
+                  </li>
+                ))}
+                <li className="pt-3">
+                  <Link to="/app/documents" className="text-sm font-medium text-primary hover:underline">
+                    View all documents
+                  </Link>
+                </li>
+              </ul>
+            ) : (
+              <EmptyState
+                Icon={FileText}
+                title={recent.isLoading ? 'Loading…' : 'No documents yet'}
+                body="Upload a lab report or prescription and its processing status will appear here."
+                action={{ to: '/app/documents', label: 'Upload a document' }}
+              />
+            )}
           </CardContent>
         </Card>
 

@@ -27,8 +27,12 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     # Local
-    "accounts",
     "core",
+    "accounts",
+    "patients",
+    "documents",
+    "medical_reports",
+    "prescriptions",
 ]
 
 MIDDLEWARE = [
@@ -60,8 +64,26 @@ TEMPLATES = [
     },
 ]
 
-# PostgreSQL in Docker/production; DATABASE_URL may point at SQLite for quick local runs.
-DATABASES = {"default": env.db("DATABASE_URL")}
+# ---------------------------------------------------------------------------
+# Database: SQLite
+# ---------------------------------------------------------------------------
+# One file, no server. SQLITE_PATH lets Docker put it on a volume; the default is backend/db.sqlite3.
+# WAL mode lets readers (API requests) proceed while a writer (e.g. a Celery job) commits, and
+# IMMEDIATE transactions + a busy timeout avoid "database is locked" errors under light concurrency.
+SQLITE_PATH = Path(env("SQLITE_PATH", default=str(BASE_DIR / "db.sqlite3")))
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": SQLITE_PATH,
+        "OPTIONS": {
+            "timeout": 20,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+        },
+        "TEST": {"NAME": None},  # tests use a fast in-memory database
+    }
+}
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -80,9 +102,24 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Uploaded medical documents. Never serve this directory publicly — access goes through
-# permission-checked API views (Phase 3).
-MEDIA_ROOT = Path(env("MEDIA_ROOT", default=str(BASE_DIR / "private_media")))
+# ---------------------------------------------------------------------------
+# Private medical document storage
+# ---------------------------------------------------------------------------
+# Files live outside any public URL space: there is deliberately no MEDIA_URL route.
+# The only way to read a file is the owner-checked /api/documents/{id}/file/ endpoint.
+PRIVATE_MEDIA_ROOT = Path(env("MEDIA_ROOT", default=str(BASE_DIR / "private_media")))
+MEDIA_ROOT = PRIVATE_MEDIA_ROOT
+FILE_UPLOAD_PERMISSIONS = 0o600
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o700
+
+DOCUMENT_MAX_UPLOAD_MB = env.int("DOCUMENT_MAX_UPLOAD_MB", default=20)
+# Upload size is enforced per file in documents/validators.py (and early via Content-Length).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2_621_440  # non-file fields only (Django default)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # larger uploads stream to a temp file
+
+# Background processing pipeline (OCR/NLP arrive in Phase 4–5). While False, uploads are
+# stored and stay "uploaded" instead of being queued, so nothing pretends to analyse them.
+DOCUMENT_PROCESSING_ENABLED = env.bool("DOCUMENT_PROCESSING_ENABLED", default=False)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -91,6 +128,14 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "uploads": env("UPLOAD_THROTTLE_RATE", default="60/hour"),
+        "auth": env("AUTH_THROTTLE_RATE", default="30/min"),
+    },
+    "EXCEPTION_HANDLER": "core.exceptions.api_exception_handler",
 }
 
 SIMPLE_JWT = {
@@ -103,6 +148,12 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localho
 CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # long OCR/LLM jobs: don't hoard tasks
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_TASK_ROUTES = {
+    "documents.tasks.*": {"queue": "documents"},
+}
 
 # AI service (OCR / NLP / RAG / Qwen) runs as a separate process — Django only calls it.
 AI_SERVICE_URL = env("AI_SERVICE_URL", default="http://localhost:8001")

@@ -12,15 +12,15 @@ const Register = lazy(() => import('@/pages/Register'))
 const AppLayout = lazy(() => import('@/layouts/AppLayout'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const ComingSoon = lazy(() => import('@/pages/ComingSoon'))
+const Documents = lazy(() => import('@/pages/Documents'))
 
 const UPCOMING = [
-  { path: 'documents', title: 'Document workspace', phase: 'Phase 4', description: 'Upload reports, preview pages, and follow OCR and analysis progress.' },
   { path: 'prescriptions', title: 'Prescription intelligence', phase: 'Phase 9', description: 'Extract medicines and instructions, confirm uncertain fields, and read verified medicine information.' },
   { path: 'assistant', title: 'AI medical assistant', phase: 'Phase 8', description: 'Ask questions about your reports and get answers with cited evidence.' },
   { path: 'timeline', title: 'Health timeline', phase: 'Phase 11', description: 'Compare reports over time and chart how your parameters change.' },
   { path: 'nutrition', title: 'Nutrition & lifestyle', phase: 'Phase 11', description: 'General food, activity and lifestyle education linked to your results.' },
   { path: 'exports', title: 'Reports & exports', phase: 'Phase 11', description: 'Download summaries with their evidence and disclaimers.' },
-  { path: 'settings', title: 'Settings', phase: 'Phase 3', description: 'Profile, privacy controls, and data management including deletion.' },
+  { path: 'settings', title: 'Settings', phase: 'Coming soon', description: 'Profile, privacy controls, and data management including deletion.' },
 ]
 
 function PageFallback() {
@@ -47,6 +47,7 @@ export default function App() {
         <Route element={<RequireAuth />}>
           <Route path="app" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="documents" element={<Documents />} />
             {UPCOMING.map(({ path, ...props }) => (
               <Route key={path} path={path} element={<ComingSoon {...props} />} />
             ))}

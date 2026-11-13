@@ -1,17 +1,6 @@
+# Development stack. The database is SQLite: one file on the `appdata` volume, shared by the API
+# and the Celery worker (same host, so WAL-mode locking works). No database server container.
 services:
-  db:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes: [pgdata:/var/lib/postgresql/data]
-    ports: ["5432:5432"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 5s
-      retries: 10
-
   redis:
     image: redis:7-alpine
     ports: ["6379:6379"]
@@ -20,35 +9,32 @@ services:
     build: ./backend
     env_file: .env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      REDIS_URL: redis://redis:6379/0
+      SQLITE_PATH: /data/db/db.sqlite3
       MEDIA_ROOT: /data/media
-    volumes: [media:/data/media]
-    depends_on:
-      db: { condition: service_healthy }
-      redis: { condition: service_started }
-    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+      REDIS_URL: redis://redis:6379/0
+    volumes: [appdata:/data]
+    depends_on: [redis]
+    command: sh -c "mkdir -p /data/db /data/media && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
     ports: ["8000:8000"]
 
   worker:
     build: ./backend
     env_file: .env
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      REDIS_URL: redis://redis:6379/0
+      SQLITE_PATH: /data/db/db.sqlite3
       MEDIA_ROOT: /data/media
-    volumes: [media:/data/media]
+      REDIS_URL: redis://redis:6379/0
+    volumes: [appdata:/data]
     depends_on: [backend]
-    command: celery -A config worker -l info
+    command: celery -A config worker -l info -Q celery,documents --concurrency 2
 
   frontend:
     build: ./frontend
     depends_on: [backend]
     ports: ["5173:80"]
 
-  # ai_service (OCR / NLP / RAG / Qwen) is added in Phase 6–8. It needs a GPU host
+  # ai_service (OCR / NLP / RAG / Qwen) is added in later phases. It needs a GPU host
   # and is deployed separately in production.
 
 volumes:
-  pgdata:
-  media:
+  appdata:  # db.sqlite3 + private medical documents. Back this volume up.

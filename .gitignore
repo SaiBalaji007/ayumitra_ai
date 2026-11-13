@@ -36,3 +36,8 @@ uploads/
 datasets/
 *chroma*/
 *.sqlite3
+
+# SQLite write-ahead log files
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal

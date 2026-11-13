@@ -12,9 +12,8 @@ django-environ==0.14.0
 djangorestframework==3.18.3
 djangorestframework_simplejwt==5.5.1
 kombu==5.7.0
+packaging==26.3
 prompt_toolkit==3.0.53
-psycopg==3.3.9
-psycopg-binary==3.3.9
 PyJWT==2.15.1
 python-dateutil==2.9.0.post0
 redis==8.1.0

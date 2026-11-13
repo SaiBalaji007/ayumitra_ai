@@ -70,7 +70,7 @@ export function apiErrorMessage(err: unknown, fallback = 'Something went wrong. 
   const data = err.response.data as Record<string, unknown> | undefined
   if (data && typeof data === 'object') {
     if (typeof data.detail === 'string') return data.detail
-    const first = Object.entries(data)[0]
+    const first = Object.entries(data).find(([k]) => k !== 'code' && k !== 'duplicate_of')
     if (first) {
       const [field, value] = first
       const msg = Array.isArray(value) ? String(value[0]) : String(value)
@@ -87,6 +87,101 @@ export type User = { id: number; email: string; first_name: string; last_name: s
 export type RegisterPayload = { email: string; password: string; first_name: string; last_name: string }
 
 export const getHealth = () => api.get<HealthResponse>('/health/').then((r) => r.data)
+
+// ---------- Documents ----------
+
+export type DocumentType = 'lab_report' | 'prescription' | 'discharge_summary' | 'imaging_report' | 'other' | 'unknown'
+export type DocumentStatus = 'uploaded' | 'queued' | 'processing' | 'completed' | 'failed'
+
+export type MedicalDocument = {
+  id: string
+  original_filename: string
+  title: string
+  content_type: string
+  file_size: number
+  document_type: DocumentType
+  document_type_display: string
+  status: DocumentStatus
+  status_display: string
+  page_count: number | null
+  document_date: string | null
+  error_message: string
+  file_url: string
+  created_at: string
+  updated_at: string
+}
+
+export type ProcessingTask = {
+  id: string
+  task_type: string
+  task_type_display: string
+  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled'
+  status_display: string
+  progress: number
+  message: string
+  started_at: string | null
+  finished_at: string | null
+  created_at: string
+}
+
+export type DocumentStatusResponse = {
+  id: string
+  status: DocumentStatus
+  status_display: string
+  error_message: string
+  page_count: number | null
+  processing_enabled: boolean
+  tasks: ProcessingTask[]
+  updated_at: string
+}
+
+export type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] }
+
+export const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
+  { value: 'lab_report', label: 'Lab report' },
+  { value: 'prescription', label: 'Prescription' },
+  { value: 'discharge_summary', label: 'Discharge summary' },
+  { value: 'imaging_report', label: 'Imaging report' },
+  { value: 'other', label: 'Other' },
+]
+
+/** Mirrors the backend limits (documents/validators.py, DOCUMENT_MAX_UPLOAD_MB). The server re-validates. */
+export const UPLOAD_LIMITS = {
+  maxBytes: 20 * 1024 * 1024,
+  extensions: ['.pdf', '.png', '.jpg', '.jpeg'],
+  accept: 'application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg',
+}
+
+export const documentsApi = {
+  list: (params: { page?: number; document_type?: DocumentType } = {}) =>
+    api.get<Paginated<MedicalDocument>>('/documents/', { params }).then((r) => r.data),
+  get: (id: string) => api.get<MedicalDocument>(`/documents/${id}/`).then((r) => r.data),
+  status: (id: string) => api.get<DocumentStatusResponse>(`/documents/${id}/status/`).then((r) => r.data),
+  remove: (id: string) => api.delete(`/documents/${id}/`),
+  upload: (
+    file: File,
+    opts: { document_type?: DocumentType; title?: string; onProgress?: (pct: number) => void; signal?: AbortSignal },
+  ) => {
+    const form = new FormData()
+    form.append('file', file)
+    if (opts.document_type) form.append('document_type', opts.document_type)
+    if (opts.title) form.append('title', opts.title)
+    return api
+      .post<MedicalDocument>('/documents/upload/', form, {
+        timeout: 0, // large scans on slow connections; the user can cancel instead
+        signal: opts.signal,
+        onUploadProgress: (e) => {
+          if (e.total) opts.onProgress?.(Math.round((e.loaded / e.total) * 100))
+        },
+      })
+      .then((r) => r.data)
+  },
+  /** Fetch the private file with the auth header and return a temporary object URL. */
+  fileUrl: async (id: string) => {
+    const res = await api.get<Blob>(`/documents/${id}/file/`, { responseType: 'blob', timeout: 0 })
+    return URL.createObjectURL(res.data)
+  },
+}
 
 export const authApi = {
   login: (email: string, password: string) =>

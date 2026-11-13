@@ -35,7 +35,18 @@ docs/             Architecture and decisions
 ```bash
 cp .env.example .env      # then set DJANGO_SECRET_KEY
 ```
-If PostgreSQL isn't installed locally, set `DATABASE_URL=sqlite:///db.sqlite3` in `.env` for now.
+Generate a secret key with:
+`python -c "import secrets; print(secrets.token_urlsafe(50))"`
+
+### Database: SQLite
+AyuMitra uses **SQLite**, so there's no database server to install. `python manage.py migrate` creates
+`backend/db.sqlite3` (gitignored). To put it somewhere else, set `SQLITE_PATH` in `.env`.
+
+- The database runs in WAL mode with a busy timeout, so the API and a Celery worker can share the file.
+- **Backups:** copy `db.sqlite3` together with `backend/private_media/`, since the files and their rows belong together.
+  Use `sqlite3 db.sqlite3 ".backup backup.sqlite3"` (or stop the server first) rather than copying a live file.
+- **Reset:** delete `db.sqlite3` and `private_media/`, then run `migrate` again.
+- Tests run against a separate in-memory SQLite database and never touch your data.
 
 ### 2. Backend
 ```bash
@@ -55,7 +66,7 @@ npm run dev                     # http://localhost:5173 (proxies /api to :8000)
 
 ### Full stack with Docker
 ```bash
-docker compose up --build       # postgres, redis, backend, celery worker, frontend
+docker compose up --build       # redis, backend, celery worker, frontend (SQLite on the `appdata` volume)
 ```
 
 ## Roadmap status
