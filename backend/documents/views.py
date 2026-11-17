@@ -110,6 +110,30 @@ class DocumentViewSet(
         response["Content-Security-Policy"] = "sandbox; default-src 'none'"
         return response
 
+    @action(detail=True, methods=["get"])
+    def extraction(self, request, pk=None):
+        """Per-page extracted text with method and OCR confidence (owner only)."""
+        document = self.get_object()
+        pages = [{"page_number": p.page_number, "text": p.text, "method": p.extraction_method,
+                  "ocr_confidence": p.ocr_confidence, "tables": (p.layout or {}).get("tables", [])}
+                 for p in document.pages.all()]
+        return Response({"id": str(document.pk), "status": document.status, "page_count": document.page_count,
+                         "suggested_type": document.suggested_type,
+                         "classification_confidence": document.classification_confidence, "pages": pages})
+
+    @action(detail=True, methods=["post"])
+    def reprocess(self, request, pk=None):
+        document = self.get_object()
+        if not settings.DOCUMENT_PROCESSING_ENABLED:
+            return Response({"detail": "Document processing is not enabled on this server.", "code": "processing_disabled"},
+                            status=status.HTTP_409_CONFLICT)
+        if document.status in (MedicalDocument.Status.QUEUED, MedicalDocument.Status.PROCESSING):
+            return Response({"detail": "This document is already being processed.", "code": "already_processing"},
+                            status=status.HTTP_409_CONFLICT)
+        with transaction.atomic():
+            enqueue_document_processing(document)
+        return Response(DocumentStatusSerializer(document).data, status=status.HTTP_202_ACCEPTED)
+
     def perform_destroy(self, instance):
         audit(self.request, AuditLog.Action.DOCUMENT_DELETE, instance, size=instance.file_size)
         instance.delete()  # the post_delete signal removes the stored file after commit

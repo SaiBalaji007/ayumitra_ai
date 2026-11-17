@@ -7,13 +7,17 @@ import {
   Menu,
   MessageSquareText,
   Pill,
-  Salad,
   Settings,
-  FileDown,
+  FlaskConical,
+  Salad,
+  HeartPulse,
+  Hospital,
+  ScanText,
   X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Logo } from '@/components/Logo'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useAuth } from '@/contexts/AuthContext'
@@ -22,11 +26,14 @@ import { cn } from '@/lib/utils'
 const APP_NAV = [
   { to: '/app', label: 'Dashboard', Icon: LayoutDashboard, end: true },
   { to: '/app/documents', label: 'Documents', Icon: FileText },
+  { to: '/app/reports', label: 'Medical reports', Icon: FlaskConical },
+  { to: '/app/prescription-analyzer', label: 'Prescription Analyzer', Icon: ScanText },
+  { to: '/app/nearby', label: 'Find Hospitals & Medical Shops', Icon: Hospital },
   { to: '/app/prescriptions', label: 'Prescriptions', Icon: Pill },
   { to: '/app/assistant', label: 'AI Assistant', Icon: MessageSquareText },
+  { to: '/app/diet', label: 'Diet recommendations', Icon: Salad },
+  { to: '/app/lifestyle', label: 'Lifestyle recommendations', Icon: HeartPulse },
   { to: '/app/timeline', label: 'Health timeline', Icon: Activity },
-  { to: '/app/nutrition', label: 'Nutrition & lifestyle', Icon: Salad },
-  { to: '/app/exports', label: 'Reports & exports', Icon: FileDown },
 ] as const
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -144,7 +151,9 @@ export default function AppLayout() {
           <ThemeToggle />
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <Outlet />
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

@@ -8,6 +8,8 @@ type AuthCtx = {
   login: (email: string, password: string) => Promise<void>
   register: (payload: RegisterPayload) => Promise<void>
   logout: () => void
+  /** Re-read the signed-in user after a profile change. */
+  refreshUser: () => Promise<void>
 }
 
 const Ctx = createContext<AuthCtx | null>(null)
@@ -51,7 +53,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [login],
   )
 
-  return <Ctx.Provider value={{ user, initializing, login, register, logout }}>{children}</Ctx.Provider>
+  const refreshUser = useCallback(async () => {
+    setUser(await authApi.me())
+  }, [])
+
+  return <Ctx.Provider value={{ user, initializing, login, register, logout, refreshUser }}>{children}</Ctx.Provider>
 }
 
 // oxlint-disable-next-line react/only-export-components -- hook lives beside its provider

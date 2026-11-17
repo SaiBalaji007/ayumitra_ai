@@ -1,9 +1,9 @@
-# Development stack. The database is SQLite: one file on the `appdata` volume, shared by the API
-# and the Celery worker (same host, so WAL-mode locking works). No database server container.
+# AyuMitra AI: full stack (CPU). SQLite database + private documents on the `appdata` volume;
+# ChromaDB, knowledge DB and model caches on `aidata`. For GPU inference see docs/DEPLOYMENT.md.
 services:
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    restart: unless-stopped
 
   backend:
     build: ./backend
@@ -12,10 +12,13 @@ services:
       SQLITE_PATH: /data/db/db.sqlite3
       MEDIA_ROOT: /data/media
       REDIS_URL: redis://redis:6379/0
+      AI_SERVICE_URL: http://ai_service:8001
+      DOCUMENT_PROCESSING_ENABLED: "True"
+      DOCUMENT_QUEUE_BACKEND: celery
     volumes: [appdata:/data]
-    depends_on: [redis]
-    command: sh -c "mkdir -p /data/db /data/media && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2"
-    ports: ["8000:8000"]
+    depends_on: [redis, ai_service]
+    command: sh -c "mkdir -p /data/db /data/media && python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 700"
+    restart: unless-stopped
 
   worker:
     build: ./backend
@@ -24,17 +27,37 @@ services:
       SQLITE_PATH: /data/db/db.sqlite3
       MEDIA_ROOT: /data/media
       REDIS_URL: redis://redis:6379/0
+      AI_SERVICE_URL: http://ai_service:8001
+      DOCUMENT_PROCESSING_ENABLED: "True"
+      DOCUMENT_QUEUE_BACKEND: celery
     volumes: [appdata:/data]
     depends_on: [backend]
     command: celery -A config worker -l info -Q celery,documents --concurrency 2
+    restart: unless-stopped
+
+  ai_service:
+    build: ./ai_service
+    environment:
+      AYUMITRA_LLM_BASE_URL: http://llm:8081/v1
+      AYUMITRA_SERVICE_TOKEN: ${AI_SERVICE_TOKEN:?set AI_SERVICE_TOKEN in .env}
+    volumes: [aidata:/data]
+    depends_on: [llm]
+    restart: unless-stopped
+
+  # Qwen2.5-3B-Instruct, official Q4_K_M GGUF, on CPU via the official llama.cpp server image.
+  # Put qwen2.5-3b-instruct-q4_k_m.gguf in ./ai_service/models first (see ai_service/README.md).
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: -m /models/qwen2.5-3b-instruct-q4_k_m.gguf --host 0.0.0.0 --port 8081 -c 8192 --alias qwen2.5-3b-instruct --jinja
+    volumes: ["./ai_service/models:/models:ro"]
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
     depends_on: [backend]
-    ports: ["5173:80"]
-
-  # ai_service (OCR / NLP / RAG / Qwen) is added in later phases. It needs a GPU host
-  # and is deployed separately in production.
+    ports: ["8080:80"]
+    restart: unless-stopped
 
 volumes:
-  appdata:  # db.sqlite3 + private medical documents. Back this volume up.
+  appdata:  # db.sqlite3 + private medical documents. Back this up (see docs/DEPLOYMENT.md).
+  aidata:   # knowledge.sqlite3, ChromaDB, RxNorm lexicon, model cache. Rebuildable via `cli ingest`.

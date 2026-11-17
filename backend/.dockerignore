@@ -2,5 +2,9 @@
 __pycache__
 *.pyc
 private_media
+media
 staticfiles
 db.sqlite3
+db.sqlite3-*
+*.sqlite3
+.env

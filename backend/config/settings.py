@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "documents",
     "medical_reports",
     "prescriptions",
+    "assistant",
 ]
 
 MIDDLEWARE = [
@@ -134,6 +135,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "uploads": env("UPLOAD_THROTTLE_RATE", default="60/hour"),
         "auth": env("AUTH_THROTTLE_RATE", default="30/min"),
+        "assistant": env("ASSISTANT_THROTTLE_RATE", default="30/hour"),
     },
     "EXCEPTION_HANDLER": "core.exceptions.api_exception_handler",
 }
@@ -157,3 +159,58 @@ CELERY_TASK_ROUTES = {
 
 # AI service (OCR / NLP / RAG / Qwen) runs as a separate process — Django only calls it.
 AI_SERVICE_URL = env("AI_SERVICE_URL", default="http://localhost:8001")
+AI_SERVICE_TOKEN = env("AI_SERVICE_TOKEN", default="")
+AI_SERVICE_OCR_TIMEOUT = env.float("AI_SERVICE_OCR_TIMEOUT", default=300)
+AI_SERVICE_LLM_TIMEOUT = env.float("AI_SERVICE_LLM_TIMEOUT", default=600)
+
+# How queued document jobs run:
+#   "db"     - a `manage.py process_documents` worker polls the ProcessingTask table (no Redis needed;
+#              the default for local Windows development with SQLite)
+#   "celery" - Celery workers via Redis (Docker / production)
+DOCUMENT_QUEUE_BACKEND = env("DOCUMENT_QUEUE_BACKEND", default="db")
+
+# ---------------------------------------------------------------------------
+# Production hardening (active when DEBUG=False)
+# ---------------------------------------------------------------------------
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # TLS terminates at the reverse proxy
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+    if SECRET_KEY in ("", "change-me") or len(SECRET_KEY) < 40:
+        raise RuntimeError("Set a strong DJANGO_SECRET_KEY (40+ random characters) for production.")
+
+# ---------------------------------------------------------------------------
+# Logging: one line per event to stdout (collected by Docker / the host). Medical content is
+# never logged: no document text, values or questions, only ids, statuses and timings.
+# ---------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "line": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"},
+    },
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "line"}},
+    "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
+    "loggers": {
+        "django.request": {"level": "WARNING"},
+        "django.db.backends": {"level": "WARNING"},
+    },
+}
+
+
+# --- Phase 2: nearby care (OpenStreetMap). Community services: cached, rate-limited, configurable.
+GEOCODER_URL = env("GEOCODER_URL", default="https://nominatim.openstreetmap.org/search")
+OVERPASS_URLS = env.list("OVERPASS_URLS", default=[
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+])
+OSM_USER_AGENT = env("OSM_USER_AGENT", default="AyuMitraAI/1.0 (health-education app; nearby care search)")

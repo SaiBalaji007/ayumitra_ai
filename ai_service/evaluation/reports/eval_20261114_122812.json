@@ -1,0 +1,81 @@
+{
+  "created": "2026-11-14T12:27:29",
+  "models": {
+    "embedding": "sentence-transformers/all-MiniLM-L6-v2",
+    "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "nli": "cross-encoder/nli-deberta-v3-small",
+    "llm": "qwen2.5-3b-instruct"
+  },
+  "index": {
+    "general": {
+      "sources": 7,
+      "chunks": 62
+    },
+    "lab_tests": {
+      "sources": 14,
+      "chunks": 237
+    },
+    "lifestyle": {
+      "sources": 6,
+      "chunks": 57
+    },
+    "medicines": {
+      "sources": 8,
+      "chunks": 209
+    },
+    "nutrition": {
+      "sources": 10,
+      "chunks": 62
+    }
+  },
+  "retrieval": {
+    "n_questions": 40,
+    "variants": {
+      "dense only": {
+        "hit@1": 0.925,
+        "recall@3": 0.942,
+        "recall@5": 0.942,
+        "precision@3": 0.35,
+        "mrr@10": 0.942,
+        "ndcg@10": 0.94,
+        "p50_latency_ms": 52.1
+      },
+      "BM25 only": {
+        "hit@1": 0.45,
+        "recall@3": 0.767,
+        "recall@5": 0.879,
+        "precision@3": 0.283,
+        "mrr@10": 0.626,
+        "ndcg@10": 0.697,
+        "p50_latency_ms": 5.4
+      },
+      "hybrid (RRF)": {
+        "hit@1": 0.825,
+        "recall@3": 0.917,
+        "recall@5": 0.95,
+        "precision@3": 0.342,
+        "mrr@10": 0.88,
+        "ndcg@10": 0.903,
+        "p50_latency_ms": 47.5
+      },
+      "hybrid + multi-query": {
+        "hit@1": 0.825,
+        "recall@3": 0.942,
+        "recall@5": 1.0,
+        "precision@3": 0.35,
+        "mrr@10": 0.9,
+        "ndcg@10": 0.925,
+        "p50_latency_ms": 68.6
+      },
+      "hybrid + multi-query + rerank": {
+        "hit@1": 0.925,
+        "recall@3": 0.942,
+        "recall@5": 0.95,
+        "precision@3": 0.35,
+        "mrr@10": 0.944,
+        "ndcg@10": 0.954,
+        "p50_latency_ms": 848.4
+      }
+    }
+  }
+}

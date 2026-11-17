@@ -3,10 +3,12 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from accounts.views import MeView, RegisterView, ThrottledTokenObtainPairView
+from accounts.views import MeView, PasswordChangeView, RegisterView, ThrottledTokenObtainPairView
+from assistant.views import ConversationViewSet, ask
+from core.nearby import nearby
 from core.views import health
 from documents.views import DocumentViewSet
-from medical_reports.views import ExtractedReportViewSet, MedicalFindingViewSet
+from medical_reports.views import ExtractedReportViewSet, MedicalFindingViewSet, recommendations, timeline
 from patients.views import MyProfileView
 from prescriptions.views import PrescriptionViewSet
 
@@ -15,6 +17,7 @@ router.register("documents", DocumentViewSet, basename="document")
 router.register("reports", ExtractedReportViewSet, basename="report")
 router.register("findings", MedicalFindingViewSet, basename="finding")
 router.register("prescriptions", PrescriptionViewSet, basename="prescription")
+router.register("assistant/conversations", ConversationViewSet, basename="conversation")
 
 # NOTE: there is intentionally no static()/MEDIA_URL route. Medical files are only reachable
 # through the owner-checked /api/documents/{id}/file/ endpoint.
@@ -25,6 +28,11 @@ urlpatterns = [
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/auth/register/", RegisterView.as_view(), name="register"),
     path("api/auth/me/", MeView.as_view(), name="me"),
+    path("api/auth/password/", PasswordChangeView.as_view(), name="password-change"),
     path("api/patients/me/profile/", MyProfileView.as_view(), name="my-profile"),
+    path("api/assistant/ask/", ask, name="assistant-ask"),
+    path("api/timeline/", timeline, name="timeline"),
+    path("api/recommendations/", recommendations, name="recommendations"),
+    path("api/care/nearby/", nearby, name="care-nearby"),
     path("api/", include(router.urls)),
 ]

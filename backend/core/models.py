@@ -21,7 +21,10 @@ class AuditLog(models.Model):
         DOCUMENT_VIEW = "document.view", "Document file accessed"
         DOCUMENT_DELETE = "document.delete", "Document deleted"
         PROFILE_UPDATE = "profile.update", "Patient profile updated"
+        REPORT_EXPORT = "report.export", "Report exported as PDF"
         ACCESS_DENIED = "access.denied", "Access denied"
+        PASSWORD_CHANGE = "account.password_change", "Password changed"
+        ACCOUNT_DELETE = "account.delete", "Account deleted"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(

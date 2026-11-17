@@ -1,0 +1,814 @@
+{
+  "created": "2026-11-14T18:53:06",
+  "models": {
+    "embedding": "sentence-transformers/all-MiniLM-L6-v2",
+    "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "nli": "cross-encoder/nli-deberta-v3-small",
+    "llm": "qwen2.5-3b-instruct"
+  },
+  "index": {
+    "general": {
+      "sources": 7,
+      "chunks": 56
+    },
+    "lab_tests": {
+      "sources": 24,
+      "chunks": 356
+    },
+    "lifestyle": {
+      "sources": 6,
+      "chunks": 52
+    },
+    "medicines": {
+      "sources": 8,
+      "chunks": 200
+    },
+    "nutrition": {
+      "sources": 12,
+      "chunks": 61
+    }
+  },
+  "retrieval": {
+    "n_questions": 40,
+    "variants": {
+      "dense only": {
+        "hit@1": 0.925,
+        "recall@3": 0.942,
+        "recall@5": 0.95,
+        "precision@3": 0.35,
+        "mrr@10": 0.942,
+        "ndcg@10": 0.944,
+        "p50_latency_ms": 42.3
+      },
+      "BM25 only": {
+        "hit@1": 0.475,
+        "recall@3": 0.742,
+        "recall@5": 0.854,
+        "precision@3": 0.275,
+        "mrr@10": 0.645,
+        "ndcg@10": 0.715,
+        "p50_latency_ms": 2.8
+      },
+      "hybrid (RRF)": {
+        "hit@1": 0.75,
+        "recall@3": 0.9,
+        "recall@5": 0.95,
+        "precision@3": 0.342,
+        "mrr@10": 0.832,
+        "ndcg@10": 0.867,
+        "p50_latency_ms": 39.8
+      },
+      "hybrid + multi-query": {
+        "hit@1": 0.75,
+        "recall@3": 0.95,
+        "recall@5": 0.975,
+        "precision@3": 0.358,
+        "mrr@10": 0.848,
+        "ndcg@10": 0.886,
+        "p50_latency_ms": 64.8
+      },
+      "hybrid + multi-query + rerank": {
+        "hit@1": 0.9,
+        "recall@3": 0.929,
+        "recall@5": 0.95,
+        "precision@3": 0.342,
+        "mrr@10": 0.93,
+        "ndcg@10": 0.942,
+        "p50_latency_ms": 786.1
+      }
+    }
+  },
+  "generation": {
+    "n": 48,
+    "errors": 0,
+    "answered_rate_in_scope": 0.975,
+    "answered_with_sources_rate_in_scope": 0.975,
+    "answered_by_tier_in_scope": {
+      "local": 37,
+      "none": 1,
+      "external": 2
+    },
+    "abstention_rate_out_of_scope": 0.125,
+    "claim_support_rate": 0.674,
+    "citation_accuracy_local": 0.812,
+    "p50_latency_ms": 57884.0,
+    "per_question": [
+      {
+        "id": "q01",
+        "type": "in_scope",
+        "latency_ms": 41036,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA hemoglobin A1C (HbA1C) test shows your average level of blood glucose over the past two to three months. [1]\n### Detailed explanation\nThe test measures the percentage of your red blood cells that have glucose-coated hemoglobin. [1]\nThe test results tell you what percentage of your hemoglobin is coated with glucose. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q02",
+        "type": "in_scope",
+        "latency_ms": 99471,
+        "error": null,
+        "tier": "none",
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 4,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "numbers not in cited evidence: 6.8",
+          "numbers not in cited evidence: 6.8",
+          "numbers not in cited evidence: 6.8",
+          "numbers not in cited evidence: 6.8"
+        ],
+        "answer": "I searched AyuMitra's medical library and external sources (MedlinePlus, MeSH, FDA drug labels and Wikipedia) but didn't find information that answers this reliably, so I won't guess. Try naming the test, condition or medicine (for example \"What does a high TSH mean?\"), or ask your doctor."
+      },
+      {
+        "id": "q03",
+        "type": "in_scope",
+        "latency_ms": 35953,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nYou need to fast before an A1C (hemoglobin A1C) blood test. [1]\n### Detailed explanation\nThe A1C test provides information about your average blood glucose levels over the past 3 months. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q04",
+        "type": "in_scope",
+        "latency_ms": 35437,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nYour doctor may order a hemoglobin test if you have symptoms of anemia, a family history of thalassemia, sickle cell anemia, or other inherited blood disorder, a diet low in iron and other minerals, a long-term infection, or excessive blood loss from an injury or surgical procedure. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q05",
+        "type": "in_scope",
+        "latency_ms": 81772,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 4,
+        "citation_source_correct": 2,
+        "rejection_reasons": [
+          "not a complete sentence",
+          "safety: states a diagnosis about the user",
+          "not supported by the cited passages",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nIt may be a sign of dehydration, anemia, heart disease, or too little iron in your body. [1]\n### Detailed explanation\nIt may be a sign of a blood disorder. [2]\n### Important points\nIt may be a sign of a disorder that causes you to repeatedly stop breathing during sleep. [3]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q06",
+        "type": "in_scope",
+        "latency_ms": 44348,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 2,
+        "citation_source_correct": 1,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nThe A1C test, which can diagnose prediabetes and diabetes, does not require fasting. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q07",
+        "type": "in_scope",
+        "latency_ms": 31964,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nThe symptoms of high blood sugar may include feeling very thirsty, feeling very hungry, urinating more often, fatigue, blurry vision, numbness or tingling in the feet or hands, sores that do not heal, and losing weight without trying. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q08",
+        "type": "in_scope",
+        "latency_ms": 36424,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 2,
+        "citation_source_correct": 2,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nHDL is high-density lipoprotein and carries cholesterol from other parts of the body back to the liver. [1]\n### Important points\nHDL and LDL are different types of lipoproteins, each with a specific function in the body. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q09",
+        "type": "in_scope",
+        "latency_ms": 94637,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 9,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not supported by the cited passages",
+          "not supported by the cited passages",
+          "not supported by the cited passages",
+          "not supported by the cited passages",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nYou need to fast for at least 9 to 12 hours before a cholesterol test. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q10",
+        "type": "in_scope",
+        "latency_ms": 34905,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nYou can lower your cholesterol through heart-healthy lifestyle changes, including a heart-healthy eating plan, weight management, and regular physical activity. [1]\nIf lifestyle changes alone do not lower your cholesterol enough, you may also need to take medicines. [1]\nThere are several types of cholesterol-lowering medicines available, including statins. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q11",
+        "type": "in_scope",
+        "latency_ms": 39941,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA CBC test checks the number and size of different cells in your blood, including red blood cells and white blood cells. [1]\n### Detailed explanation\nIt measures the number of red blood cells, which carry oxygen from your lungs to the rest of your body. [1]\nIt also measures the number of white blood cells, which fight infections and other diseases. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q12",
+        "type": "in_scope",
+        "latency_ms": 31191,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nAbnormal CBC results may indicate dehydration, anemia, heart disease, or too little iron in the body. [1]\n### Detailed explanation\nA low white cell count may be a sign of an autoimmune disorder, bone marrow disorder, or cancer. [1]\nA high white cell count may be a sign of an infection or a reaction to a medicine. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q13",
+        "type": "in_scope",
+        "latency_ms": 44879,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA creatinine test is done to check the health of your kidneys. [1]\n### Detailed explanation\nIt is also done to diagnose kidney disease and monitor kidney problems. [1]\n### Important points\nCreatinine levels in blood or urine may be used to calculate a urine albumin to creatinine ratio (UACR), which is sometimes called a microalbumin creatinine ratio. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q14",
+        "type": "in_scope",
+        "latency_ms": 59652,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 2,
+        "citation_source_correct": 2,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nSerious liver disease can also lead to low levels of blood creatinine, which means high creatinine levels in blood may not always indicate kidney problems. [1]\n### When to consult a doctor\nIf your results from creatinine blood or urine tests were used to calculate an eGFR, creatinine clearance, and/or a urine albumin to creatinine ratio, ask your provider to explain what these measurements say about your kidney health. [1]"
+      },
+      {
+        "id": "q15",
+        "type": "in_scope",
+        "latency_ms": 51932,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 1,
+        "citation_source_correct": 4,
+        "rejection_reasons": [
+          "not a complete sentence"
+        ],
+        "answer": "### Direct answer\nProthrombin is a protein involved in blood clotting and is made in the liver. [1]\n### Detailed explanation\nLiver function tests can show how well your liver is working and whether it may be damaged by liver disease or injury. [1]\nIf your results are abnormal, you'll usually need other tests to find the exact cause. [1]\n### Important points\nLiver function tests are most often used to help: - Find out if liver disease or damage could be causing certain symptoms - Learn how serious liver disease is after it has been diagnosed - Monitor liver disease over time and/or find out how well treatment is working - Check for side effects of a few. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q16",
+        "type": "in_scope",
+        "latency_ms": 91106,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 5,
+        "rejected_claims": 2,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nAn ALT test is used to help diagnose liver damage or disease. [1]\n### Detailed explanation\nAST and ALT are liver enzymes that can indicate liver damage or disease. [2][3]\nAn ALT test is usually ordered as part of a group of liver function tests. [4]\nAn ALT test may help diagnose certain liver diseases early, when they may be easier to treat. [1]\n### Important points\nHigh levels of AST and ALT in the blood may indicate liver disease or other liver problems. [3]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q17",
+        "type": "in_scope",
+        "latency_ms": 68349,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 3,
+        "citation_source_correct": 1,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nYour provider may order a vitamin D test if you have kidney or liver disease that affects your ability to change vitamin D into a form your body can use. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q18",
+        "type": "in_scope",
+        "latency_ms": 56116,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 1,
+        "citation_source_correct": 3,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nA low vitamin D result means very low vitamin D levels that are likely to affect your bones and general health. [1]\n### Detailed explanation\nThis low vitamin D level is considered deficient, which is a serious condition that can lead to bone disorders and other health issues. [1]\n### Important points\nDeficiency in vitamin D can be caused by not getting enough from diet and sunlight, or by having trouble absorbing or using vitamin D. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q19",
+        "type": "in_scope",
+        "latency_ms": 70709,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 3,
+        "citation_source_correct": 1,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nVitamin D helps your immune system fight off bacteria and viruses. [1]\n### Important points\n- Vitamin D deficiency can lead to bone disorders and other medical conditions. [2]\n- Babies and children can develop serious health problems from a lack of vitamin D. [3]\n- Your body forms vitamin D naturally after exposure to sunlight. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q20",
+        "type": "in_scope",
+        "latency_ms": 81386,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 7,
+        "rejected_claims": 0,
+        "citation_source_correct": 5,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nYou can get vitamin D through your skin, from your diet, and from supplements. [1]\n### Detailed explanation\nYour body forms vitamin D naturally after exposure to sunlight. [1]\nVery few foods naturally contain vitamin D. [1]\nYou can absorb vitamin D better when you take your supplements with a meal or snack that includes some fat. [2]\n### Important points\n- It's a good idea to ask your health care provider first if you need to take vitamin supplements. [3]\n- Most vitamin D blood tests measure the level of 25(OH)D in your blood. [4]\n- You can get vitamin D from your diet by eating foods that are fortified. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q21",
+        "type": "in_scope",
+        "latency_ms": 77411,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 5,
+        "rejected_claims": 1,
+        "citation_source_correct": 5,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nTriglycerides are a type of fat found in the blood, and they are tested to understand your risk for heart disease, stroke, and other conditions involving your arteries. [1]\nTriglycerides are measured in a blood test, and high levels can increase the risk of heart disease and stroke. [2]\n### Detailed explanation\nTriglycerides are important for good health, but extra calories are turned into triglycerides and stored in fat cells. [2]\nTriglycerides are tested to help you find and treat high triglyceride levels before they harm your health. [3]\nTriglycerides are tested as part of a lipid profile, which measures fats in the blood, including triglycerides and cholesterol. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q22",
+        "type": "in_scope",
+        "latency_ms": 46807,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nHigh triglyceride levels increase your risk of heart disease, stroke, and other conditions that affect your arteries. [1]\n### Detailed explanation\nHigh triglyceride levels also increase your risk of metabolic syndrome. [1]\nVery high triglyceride levels increase your risk of sudden pancreatitis. [1]\n### Important points\nHigh triglyceride levels may increase the risk of heart disease, especially in women. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q23",
+        "type": "in_scope",
+        "latency_ms": 151946,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 8,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not a complete sentence",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nPlatelets are blood cells that form in your bone marrow and play a major role in blood clotting. [1]\n### Detailed explanation\nWe test platelets to check if your blood has a low number of platelets, which is called thrombocytopenia. [1]\nPlatelets are non-nucleated disk-shaped cells formed in the megakaryocyte and found in the blood of all mammals. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q24",
+        "type": "in_scope",
+        "latency_ms": 32005,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA low platelet count may indicate a cancer that affects the blood, such as leukemia or lymphoma, a viral infection like mononucleosis, hepatitis, or measles, an autoimmune disease, or gestational thrombocytopenia. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q25",
+        "type": "in_scope",
+        "latency_ms": 37154,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nA high white blood cell count may be a sign of an infection or a reaction to a medicine. [1]\n### Detailed explanation\nIt can also be a sign of an autoimmune disorder, bone marrow disorder, or cancer. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q26",
+        "type": "in_scope",
+        "latency_ms": 74998,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 1,
+        "citation_source_correct": 3,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nIt is used to help diagnose or monitor disorders such as autoimmune and inflammatory diseases, bacterial or viral infections, cancers, allergic reactions, and other conditions. [1]\n### Detailed explanation\nIt is ordered when there are symptoms of an infection, inflammation, or autoimmune disease, such as fever, chills, body aches, headache, red wound, pus, or ongoing cough. [2]\nIt is ordered if the test shows your white blood count is getting too low, and your provider may want to adjust your treatment. [3]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q27",
+        "type": "in_scope",
+        "latency_ms": 45897,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA uric acid test can be used to help find out whether high levels of uric acid are causing kidney stones. [1]\nA uric acid test can be used to help diagnose gout, usually when done with a synovial fluid analysis. [2]\nA uric acid test can be used to monitor the risk of developing kidney stones in people who have gout. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q28",
+        "type": "in_scope",
+        "latency_ms": 65299,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 6,
+        "rejected_claims": 0,
+        "citation_source_correct": 6,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nHigh uric acid levels may be related to kidney disease, lead poisoning, or alcohol use disorder. [1]\n### Detailed explanation\nHigh uric acid levels can also cause kidney stones or kidney failure. [2]\nMany people have high levels of uric acid without having health problems. [1]\nHigh uric acid levels can be caused by eating too many foods that are high in purines. [3]\nA uric acid test measures the amount of uric acid in a sample of your blood or urine. [5]\n### Important points\nHigh uric acid levels can be a side effect of certain cancer treatments. [4]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q29",
+        "type": "in_scope",
+        "latency_ms": 39528,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA basic metabolic panel (BMP) includes eight different substances in your blood. [1]\n### Detailed explanation\nA comprehensive metabolic panel (CMP) includes the same eight tests as a BMP, plus six more tests. [2]\n### Important points\nThe additional tests in a CMP include albumin, total protein, ALP, ALT, and AST. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q30",
+        "type": "in_scope",
+        "latency_ms": 40152,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nA ferritin blood test measures the level of ferritin in your blood. [1]\n### Detailed explanation\nFerritin is a protein that binds to iron and stores it in your body. [1]\n### Important points\nToo little or too much iron in your body can cause serious health problems if not treated. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q31",
+        "type": "in_scope",
+        "latency_ms": 34443,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 1,
+        "citation_source_correct": 2,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "### Direct answer\nWithout treatment, iron deficiency anemia can lead to heart problems, infections, slow growth and brain development in children, and other health issues. [1]\n### Detailed explanation\nIron deficiency anemia is a common type of anemia where your body doesn't make enough red blood cells. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q32",
+        "type": "in_scope",
+        "latency_ms": 39403,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nThere are different types of diabetes: Type 1 diabetes and Type 2 diabetes. [1]\n### Detailed explanation\nType 1 diabetes happens when your immune system attacks and destroys the cells that produce insulin. [1]\n### Important points\nType 2 diabetes is caused by several factors, including lifestyle factors and genes. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q33",
+        "type": "in_scope",
+        "latency_ms": 61020,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 1,
+        "citation_source_correct": 2,
+        "rejection_reasons": [
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nType 2 diabetes can be prevented through lifestyle changes such as healthy eating and exercise. [1]\n### Detailed explanation\nThese lifestyle changes may also help prevent gestational diabetes. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q34",
+        "type": "in_scope",
+        "latency_ms": 65436,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 1,
+        "citation_source_correct": 3,
+        "rejection_reasons": [
+          "numbers not in cited evidence: 2, 3"
+        ],
+        "answer": "### Direct answer\nTo find out if you have diabetes, your health care provider will use one or more glucose blood tests. [1]\n### Detailed explanation\nThere are several types of glucose blood tests used for diagnosing diabetes, including the A1C test. [1]\n### Important points\n- The A1C test is not used to diagnose gestational diabetes. [2]\n- If you have prediabetes, you are more likely to develop type 2 diabetes. [3]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q35",
+        "type": "in_scope",
+        "latency_ms": 42161,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 2,
+        "citation_source_correct": 1,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nFor children and teens, high blood pressure is diagnosed when it reaches 180 or higher. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q36",
+        "type": "in_scope",
+        "latency_ms": 91713,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 3,
+        "citation_source_correct": 1,
+        "rejection_reasons": [
+          "repeats an earlier sentence",
+          "repeats an earlier sentence",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nHigh blood pressure causes the heart to pump harder and work overtime, possibly leading to serious health problems such as heart attack, stroke, heart failure, and kidney failure. [1]\n### Detailed explanation\nHigh blood pressure can cause the buildup of a sticky substance called plaque in your arteries, which can lead to a heart attack or stroke. [2]\nHigh blood pressure can cause the buildup of plaque in arteries, which can lead to problems such as carotid artery disease, stroke, and peripheral arterial disease. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q37",
+        "type": "in_scope",
+        "latency_ms": 48931,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 2,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nAdults over age 60 may lose their appetite or withdraw from other people. [1]\n### Detailed explanation\nHypothyroidism, or underactive thyroid, is when your thyroid gland doesn't make enough thyroid hormones to meet your body's needs. [2]\n### Important points\nThe symptoms of hypothyroidism can vary from person to person and may include: - Fatigue - Weight gain - A puffy face - Trouble tolerating cold - Joint and muscle pain - Constipation - Dry skin - Dry, thinning hair - Decreased sweating - Heavy or irregular menstrual periods - Fertility problems in. [3]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q38",
+        "type": "in_scope",
+        "latency_ms": 104598,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 3,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nHypothyroidism has several causes, including thyroiditis, congenital hypothyroidism, surgical removal of part or all of the thyroid, radiation treatment of the thyroid, certain medicines, and pituitary disease or too much or too little iodine in your diet. [1]\n### Detailed explanation\nCongenital hypothyroidism is hypothyroidism that is present at birth. [1]\nIn rare cases, hypothyroidism can be caused by a pituitary disease or too much or too little iodine in your diet. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "q39",
+        "type": "in_scope",
+        "latency_ms": 107884,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 6,
+        "rejected_claims": 0,
+        "citation_source_correct": 5,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nAnemia is a condition where your body does not make enough healthy red blood cells. [1]\n### Detailed explanation\nAnemia has three main causes: blood loss, lack of red blood cell production, and high rates of red blood cell destruction. [2]\n### Important points\n- Anemia can be caused by conditions such as heavy periods, pregnancy, ulcers, colon polyps or colon cancer, inherited disorders, and a diet lacking in iron, folic acid, or vitamin B12. [2]\n- Anemia can also be caused by blood disorders such as sickle cell anemia and thalassemia, or cancer, and aplastic anemia, a condition that can be inherited or acquired. [2]\n- Anemia can be caused by G6PD deficiency, a metabolic disorder. [2]\n### When to consult a doctor\nAnemia can be diagnosed with a physical exam and blood tests. [3]"
+      },
+      {
+        "id": "q40",
+        "type": "in_scope",
+        "latency_ms": 80203,
+        "error": null,
+        "tier": "local",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 3,
+        "citation_source_correct": 4,
+        "rejection_reasons": [
+          "not a complete sentence",
+          "not supported by the cited passages",
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nNephrons are tiny structures in the kidneys that filter blood and remove wastes. [1]\n### Detailed explanation\nThe kidneys are located near the middle of the back, just below the rib cage. [1]\nNephrons are responsible for filtering blood and removing wastes. [1]\nThe kidneys are part of the urinary system. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "oos01",
+        "type": "out_of_scope",
+        "latency_ms": 101422,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 2,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not a complete sentence",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nIf you think you might have dengue, you should see a health care provider and mention any recent travel. [1]\n### Detailed explanation\nYou should take acetaminophen to control fever and relieve pain. [1]\nRest as much as possible. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "oos02",
+        "type": "out_of_scope",
+        "latency_ms": 62430,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 3,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nYou lie still on a table that slides you into the scanner, and the scanner takes the pictures. [1]\n### Detailed explanation\nCardiac MRI (magnetic resonance imaging) is a painless imaging test that uses radio waves, magnets, and a computer to create detailed pictures of your heart. [1]\nThe MRI is a large, tunnel-like machine. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "oos03",
+        "type": "out_of_scope",
+        "latency_ms": 28054,
+        "error": null,
+        "tier": "general_knowledge",
+        "status": "answered",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "### Direct answer\nThe price of insulin in India can vary widely depending on the type of insulin, dosage, and pharmacy. Generic insulin is often cheaper than brand names.\n### Detailed explanation\nInsulin is a medication used to treat diabetes. In India, the cost of insulin can range from free to several hundred rupees per vial, depending on the type and the pharmacy. Generic insulin is generally less expensive than brand-name insulin. The price also depends on the dosage needed and the pharmacy's pricing strategy.\n### Important points\n- Insulin prices can vary significantly.\n- Generic insulin is often less expensive than brand-name insulin.\n- Dosage and pharmacy can affect the final cost.\n### When to consult a doctor\nIf you are unsure about your insulin cost or need help managing your diabetes, it's best to consult a healthcare provider. They can provide guidance on managing diabetes and insulin costs."
+      },
+      {
+        "id": "oos04",
+        "type": "out_of_scope",
+        "latency_ms": 122564,
+        "error": null,
+        "tier": "wikipedia",
+        "status": "answered",
+        "accepted_claims": 5,
+        "rejected_claims": 2,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nThe plant, particularly its root powder, has been used for centuries in traditional Indian medicine. [1]\n### Detailed explanation\nIt is undergoing research for potential effects on stress, anxiety, and sleep. [1]\nIt is commonly sold as a dietary supplement containing root or leaf powder or extracts. [1]\n### Important points\n- Current clinical evidence is insufficient to confirm its safety or efficacy. [1]\n- The plant is affected by various pests and diseases in India, which can damage plant health and reduce its secondary metabolite content. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "oos05",
+        "type": "out_of_scope",
+        "latency_ms": 10349,
+        "error": null,
+        "tier": "none",
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I searched AyuMitra's medical library and external sources (MedlinePlus, MeSH, FDA drug labels and Wikipedia) but didn't find information that answers this reliably, so I won't guess. Try naming the test, condition or medicine (for example \"What does a high TSH mean?\"), or ask your doctor."
+      },
+      {
+        "id": "oos06",
+        "type": "out_of_scope",
+        "latency_ms": 112530,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 2,
+        "rejected_claims": 3,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user",
+          "safety: states a diagnosis about the user",
+          "repeats an earlier sentence"
+        ],
+        "answer": "### Direct answer\nThe PSA test measures a protein called prostate-specific antigen (PSA) produced by the prostate gland, and a high PSA level can indicate prostate cancer. [1]\n### When to consult a doctor\nThe PSA test is a blood test used to screen for prostate cancer, and a high PSA level can indicate prostate cancer, but it's not proof of cancer. [1]"
+      },
+      {
+        "id": "oos07",
+        "type": "out_of_scope",
+        "latency_ms": 81447,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 4,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nExercises are recommended to improve strength, flexibility, and balance for knee arthritis. [1]\n### Detailed explanation\nThe goal of treating knee arthritis is to ease pain and help move better. [1]\n### Important points\n- Weight loss can help improve pain in the knees. [1]\n- Braces or shoe inserts can be fitted by a health care provider. [1]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      },
+      {
+        "id": "oos08",
+        "type": "out_of_scope",
+        "latency_ms": 75014,
+        "error": null,
+        "tier": "external",
+        "status": "answered",
+        "accepted_claims": 6,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "### Direct answer\nMigraines have a genetic cause. [1]\n### Detailed explanation\nThere are also a number of factors that can trigger a migraine. [1]\nMigraines are a recurring type of headache. [1]\n### Important points\n- Migraines can be triggered by tight muscles in the shoulders, neck, scalp and jaw. [2]\n- Migraines can be triggered by stress, depression or anxiety. [2]\n- Migraines can be triggered by working too much, not getting enough sleep, missing meals, or using alcohol. [2]\n### When to consult a doctor\nGeneral advice: talk to a doctor if you have symptoms that worry you or don't go away, if a result on your report is outside the lab's range, or before starting, stopping or changing any medicine or supplement."
+      }
+    ]
+  }
+}

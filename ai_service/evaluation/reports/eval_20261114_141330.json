@@ -1,0 +1,694 @@
+{
+  "created": "2026-11-14T13:53:56",
+  "models": {
+    "embedding": "sentence-transformers/all-MiniLM-L6-v2",
+    "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "nli": "cross-encoder/nli-deberta-v3-small",
+    "llm": "qwen2.5-3b-instruct"
+  },
+  "index": {
+    "general": {
+      "sources": 7,
+      "chunks": 56
+    },
+    "lab_tests": {
+      "sources": 24,
+      "chunks": 356
+    },
+    "lifestyle": {
+      "sources": 6,
+      "chunks": 52
+    },
+    "medicines": {
+      "sources": 8,
+      "chunks": 200
+    },
+    "nutrition": {
+      "sources": 10,
+      "chunks": 58
+    }
+  },
+  "retrieval": {
+    "n_questions": 40,
+    "variants": {
+      "dense only": {
+        "hit@1": 0.925,
+        "recall@3": 0.942,
+        "recall@5": 0.95,
+        "precision@3": 0.35,
+        "mrr@10": 0.942,
+        "ndcg@10": 0.944,
+        "p50_latency_ms": 42.4
+      },
+      "BM25 only": {
+        "hit@1": 0.475,
+        "recall@3": 0.767,
+        "recall@5": 0.854,
+        "precision@3": 0.283,
+        "mrr@10": 0.647,
+        "ndcg@10": 0.717,
+        "p50_latency_ms": 3.5
+      },
+      "hybrid (RRF)": {
+        "hit@1": 0.75,
+        "recall@3": 0.925,
+        "recall@5": 0.95,
+        "precision@3": 0.35,
+        "mrr@10": 0.838,
+        "ndcg@10": 0.872,
+        "p50_latency_ms": 47.2
+      },
+      "hybrid + multi-query": {
+        "hit@1": 0.75,
+        "recall@3": 0.95,
+        "recall@5": 0.975,
+        "precision@3": 0.358,
+        "mrr@10": 0.856,
+        "ndcg@10": 0.893,
+        "p50_latency_ms": 73.6
+      },
+      "hybrid + multi-query + rerank": {
+        "hit@1": 0.9,
+        "recall@3": 0.929,
+        "recall@5": 0.95,
+        "precision@3": 0.342,
+        "mrr@10": 0.93,
+        "ndcg@10": 0.942,
+        "p50_latency_ms": 983.5
+      }
+    }
+  },
+  "generation": {
+    "n": 48,
+    "errors": 0,
+    "answered_rate_in_scope": 0.675,
+    "abstention_rate_out_of_scope": 1.0,
+    "claim_support_rate": 0.675,
+    "citation_accuracy": 0.963,
+    "p50_latency_ms": 24346.0,
+    "per_question": [
+      {
+        "id": "q01",
+        "type": "in_scope",
+        "latency_ms": 11752,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A hemoglobin A1C (HbA1C) test shows your average level of blood glucose over the past two to three months. [1]"
+      },
+      {
+        "id": "q02",
+        "type": "in_scope",
+        "latency_ms": 32453,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "numbers not in cited evidence: 6.8"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q03",
+        "type": "in_scope",
+        "latency_ms": 21156,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "You will need to fast for this test. [1]"
+      },
+      {
+        "id": "q04",
+        "type": "in_scope",
+        "latency_ms": 39719,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q05",
+        "type": "in_scope",
+        "latency_ms": 36340,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Low hemoglobin levels may be a sign of different types of anemia, iron deficiency, liver disease, cancer, and other diseases, or lack of certain nutrients like iron or vitamin B-12. [1]"
+      },
+      {
+        "id": "q06",
+        "type": "in_scope",
+        "latency_ms": 29192,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A fasting blood sugar test is done without fasting and uses one blood sample. [1][2]"
+      },
+      {
+        "id": "q07",
+        "type": "in_scope",
+        "latency_ms": 36552,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "The symptoms of high blood sugar may include feeling very thirsty, feeling very hungry, urinating (peeing) more often, including at night, fatigue, blurry vision, numbness or tingling in the feet or hands, sores that do not heal, and losing weight without trying. [1]"
+      },
+      {
+        "id": "q08",
+        "type": "in_scope",
+        "latency_ms": 24513,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q09",
+        "type": "in_scope",
+        "latency_ms": 12800,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "You may need to fast for 9 to 12 hours before your blood cholesterol test. [1]"
+      },
+      {
+        "id": "q10",
+        "type": "in_scope",
+        "latency_ms": 26574,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "You can lower your cholesterol through heart-healthy lifestyle changes, including a heart-healthy eating plan, weight management, and regular physical activity. [1]"
+      },
+      {
+        "id": "q11",
+        "type": "in_scope",
+        "latency_ms": 26093,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A CBC test checks the number and size of the different cells in your blood, including red blood cells, which carry oxygen, and white blood cells, which fight infections and other diseases. [1]"
+      },
+      {
+        "id": "q12",
+        "type": "in_scope",
+        "latency_ms": 28775,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Abnormal CBC results may be a sign of dehydration, anemia, heart disease, or too little iron in your body. [1]"
+      },
+      {
+        "id": "q13",
+        "type": "in_scope",
+        "latency_ms": 28157,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A creatinine test is done to check the health of your kidneys and diagnose kidney disease. [1]"
+      },
+      {
+        "id": "q14",
+        "type": "in_scope",
+        "latency_ms": 32143,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q15",
+        "type": "in_scope",
+        "latency_ms": 22196,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "... and substances made by your liver. [1]"
+      },
+      {
+        "id": "q16",
+        "type": "in_scope",
+        "latency_ms": 25970,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q17",
+        "type": "in_scope",
+        "latency_ms": 28963,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Babies and children can develop serious health problems from a lack of vitamin D and may need a vitamin D test. [1]"
+      },
+      {
+        "id": "q18",
+        "type": "in_scope",
+        "latency_ms": 27314,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A low vitamin D result means very low vitamin D levels that are likely to affect your bones and general health. [1]"
+      },
+      {
+        "id": "q19",
+        "type": "in_scope",
+        "latency_ms": 25281,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q20",
+        "type": "in_scope",
+        "latency_ms": 48305,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "You can get vitamin D through your skin, from your diet, and from supplements. [1]"
+      },
+      {
+        "id": "q21",
+        "type": "in_scope",
+        "latency_ms": 29117,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q22",
+        "type": "in_scope",
+        "latency_ms": 28827,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "High triglyceride levels increase your risk of heart disease, stroke, and other conditions that affect your arteries. [1]"
+      },
+      {
+        "id": "q23",
+        "type": "in_scope",
+        "latency_ms": 24408,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "...small blood cells. They form in your bone marrow, the sponge-like tissue in your bones. Platelets are essential for blood clotting . [1]"
+      },
+      {
+        "id": "q24",
+        "type": "in_scope",
+        "latency_ms": 30708,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A low platelet count (thrombocytopenia) may be a sign of various conditions such as cancer, viral infections, autoimmune diseases, or gestational thrombocytopenia. [1]"
+      },
+      {
+        "id": "q25",
+        "type": "in_scope",
+        "latency_ms": 20262,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q26",
+        "type": "in_scope",
+        "latency_ms": 22298,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q27",
+        "type": "in_scope",
+        "latency_ms": 22968,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A uric acid test can be used to help diagnose gout, usually when done with a synovial fluid analysis. [1]"
+      },
+      {
+        "id": "q28",
+        "type": "in_scope",
+        "latency_ms": 32910,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "High uric acid levels may be related to many conditions, including gout, kidney disease or kidney stones, leukemia, multiple myeloma, or cancer that has spread in your body (metastatic cancer), side effects from certain cancer treatments, such as chemotherapy, alcohol use disorder, and preeclampsia, a condition that can cause dangerously high blood pressure in pregnant women. [1]"
+      },
+      {
+        "id": "q29",
+        "type": "in_scope",
+        "latency_ms": 23635,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "not supported by the cited passages"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q30",
+        "type": "in_scope",
+        "latency_ms": 23058,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "A ferritin blood test measures the level of ferritin in your blood. [1]"
+      },
+      {
+        "id": "q31",
+        "type": "in_scope",
+        "latency_ms": 19556,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q32",
+        "type": "in_scope",
+        "latency_ms": 22575,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "There are different types of diabetes: Type 1 diabetes and Type 2 diabetes. [1]"
+      },
+      {
+        "id": "q33",
+        "type": "in_scope",
+        "latency_ms": 24284,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Type 2 diabetes can be prevented through lifestyle changes such as healthy eating and exercise. [1]"
+      },
+      {
+        "id": "q34",
+        "type": "in_scope",
+        "latency_ms": 22496,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q35",
+        "type": "in_scope",
+        "latency_ms": 21167,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "High blood pressure is considered dangerously high when it is 180 or higher for adults and higher than 120 for children and teens. [1]"
+      },
+      {
+        "id": "q36",
+        "type": "in_scope",
+        "latency_ms": 25019,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "When your blood pressure stays high over time, it causes the heart to pump harder and work overtime, possibly leading to serious health problems such as heart attack, stroke, heart failure, and kidney failure. [1]"
+      },
+      {
+        "id": "q37",
+        "type": "in_scope",
+        "latency_ms": 35179,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Fatigue, weight gain, a puffy face, trouble tolerating cold, joint and muscle pain, constipation, dry skin, dry, thinning hair, decreased sweating, heavy or irregular menstrual periods, fertility problems in women, and depression are some of the symptoms of an underactive thyroid. [1][2]"
+      },
+      {
+        "id": "q38",
+        "type": "in_scope",
+        "latency_ms": 37004,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Hypothyroidism has several causes, including thyroiditis, inflammation of the thyroid; congenital hypothyroidism, hypothyroidism present at birth; surgical removal of part or all of the thyroid; radiation treatment of the thyroid; certain medicines; and in rare cases, a pituitary disease or too much or too little iodine in your diet. [1]"
+      },
+      {
+        "id": "q39",
+        "type": "in_scope",
+        "latency_ms": 21447,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 1,
+        "citation_source_correct": 0,
+        "rejection_reasons": [
+          "safety: states a diagnosis about the user"
+        ],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "q40",
+        "type": "in_scope",
+        "latency_ms": 22958,
+        "error": null,
+        "status": "answered",
+        "accepted_claims": 1,
+        "rejected_claims": 0,
+        "citation_source_correct": 1,
+        "rejection_reasons": [],
+        "answer": "Your kidneys filter your blood, removing wastes and extra water, which become urine. [1]"
+      },
+      {
+        "id": "oos01",
+        "type": "out_of_scope",
+        "latency_ms": 1159,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos02",
+        "type": "out_of_scope",
+        "latency_ms": 798,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos03",
+        "type": "out_of_scope",
+        "latency_ms": 883,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos04",
+        "type": "out_of_scope",
+        "latency_ms": 1743,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos05",
+        "type": "out_of_scope",
+        "latency_ms": 764,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos06",
+        "type": "out_of_scope",
+        "latency_ms": 1177,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos07",
+        "type": "out_of_scope",
+        "latency_ms": 9400,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      },
+      {
+        "id": "oos08",
+        "type": "out_of_scope",
+        "latency_ms": 1325,
+        "error": null,
+        "status": "insufficient_evidence",
+        "accepted_claims": 0,
+        "rejected_claims": 0,
+        "citation_source_correct": 0,
+        "rejection_reasons": [],
+        "answer": "I couldn't find information about this in AyuMitra's trusted medical sources, so I won't guess. Please ask your doctor, or try rephrasing the question."
+      }
+    ]
+  }
+}

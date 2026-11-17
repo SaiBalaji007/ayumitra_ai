@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, ChevronDown, Eye, FileImage, FileText, Info, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -145,6 +146,11 @@ function DocumentRow({ doc }: { doc: MedicalDocument }) {
           </p>
         </div>
         <DocumentStatusBadge status={doc.status} label={doc.status_display} />
+        {doc.status === 'completed' && (doc.document_type === 'lab_report' || doc.document_type === 'prescription') && (
+          <Link to={doc.document_type === 'lab_report' ? '/app/reports' : '/app/prescriptions'} className="text-xs font-medium text-primary hover:underline">
+            {doc.document_type === 'lab_report' ? 'View results' : 'Review medicines'}
+          </Link>
+        )}
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="size-8" onClick={view} disabled={opening} aria-label={`View ${doc.original_filename}`} title="View file">
             {opening ? <Loader2 className="animate-spin" /> : <Eye />}

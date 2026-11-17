@@ -205,7 +205,7 @@ export default function Dashboard() {
             <CardContent className="space-y-2 text-sm">
               <StatusRow label="API" ok={health.isSuccess} pending={health.isLoading} />
               <StatusRow label="Database" ok={health.data?.database !== undefined && health.data.database !== 'unavailable'} pending={health.isLoading} />
-              <StatusRow label="AI engine" ok={false} pending={false} note="Coming in Phase 8" />
+
             </CardContent>
           </Card>
         </div>

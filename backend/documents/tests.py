@@ -21,11 +21,15 @@ def make_user(email):
 
 
 class DocumentTestBase(APITestCase):
+    # Tests must not depend on the developer's .env (which may enable processing locally).
+    processing_enabled = False
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls._media = tempfile.mkdtemp(prefix="ayumitra-test-media-")
-        cls._override = override_settings(MEDIA_ROOT=cls._media, PRIVATE_MEDIA_ROOT=Path(cls._media))
+        cls._override = override_settings(MEDIA_ROOT=cls._media, PRIVATE_MEDIA_ROOT=Path(cls._media),
+                                          DOCUMENT_PROCESSING_ENABLED=cls.processing_enabled)
         cls._override.enable()
 
     @classmethod
@@ -249,6 +253,8 @@ class DocumentApiTests(DocumentTestBase):
 @override_settings(DOCUMENT_PROCESSING_ENABLED=True, CELERY_TASK_ALWAYS_EAGER=True)
 class ProcessingPipelineTests(DocumentTestBase):
     """The Celery plumbing, exercised eagerly (no Redis needed) with test-only steps."""
+
+    processing_enabled = True
 
     def setUp(self):
         super().setUp()

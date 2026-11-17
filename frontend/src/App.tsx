@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { GuestOnly, RequireAuth } from '@/components/RouteGuards'
 import MarketingLayout from '@/layouts/MarketingLayout'
 import NotFound from '@/pages/NotFound'
@@ -11,17 +11,16 @@ const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
 const AppLayout = lazy(() => import('@/layouts/AppLayout'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
-const ComingSoon = lazy(() => import('@/pages/ComingSoon'))
 const Documents = lazy(() => import('@/pages/Documents'))
-
-const UPCOMING = [
-  { path: 'prescriptions', title: 'Prescription intelligence', phase: 'Phase 9', description: 'Extract medicines and instructions, confirm uncertain fields, and read verified medicine information.' },
-  { path: 'assistant', title: 'AI medical assistant', phase: 'Phase 8', description: 'Ask questions about your reports and get answers with cited evidence.' },
-  { path: 'timeline', title: 'Health timeline', phase: 'Phase 11', description: 'Compare reports over time and chart how your parameters change.' },
-  { path: 'nutrition', title: 'Nutrition & lifestyle', phase: 'Phase 11', description: 'General food, activity and lifestyle education linked to your results.' },
-  { path: 'exports', title: 'Reports & exports', phase: 'Phase 11', description: 'Download summaries with their evidence and disclaimers.' },
-  { path: 'settings', title: 'Settings', phase: 'Coming soon', description: 'Profile, privacy controls, and data management including deletion.' },
-]
+const Assistant = lazy(() => import('@/pages/Assistant'))
+const Reports = lazy(() => import('@/pages/Reports'))
+const Prescriptions = lazy(() => import('@/pages/Prescriptions'))
+const Timeline = lazy(() => import('@/pages/Timeline'))
+const Settings = lazy(() => import('@/pages/Settings'))
+const Diet = lazy(() => import('@/pages/Diet'))
+const Lifestyle = lazy(() => import('@/pages/Lifestyle'))
+const NearbyCare = lazy(() => import('@/pages/NearbyCare'))
+const PrescriptionAnalyzer = lazy(() => import('@/pages/PrescriptionAnalyzer'))
 
 function PageFallback() {
   return (
@@ -48,9 +47,20 @@ export default function App() {
           <Route path="app" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="documents" element={<Documents />} />
-            {UPCOMING.map(({ path, ...props }) => (
-              <Route key={path} path={path} element={<ComingSoon {...props} />} />
-            ))}
+            <Route path="assistant" element={<Assistant />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="reports/:id" element={<Reports />} />
+            <Route path="prescriptions" element={<Prescriptions />} />
+            <Route path="prescriptions/:id" element={<Prescriptions />} />
+            <Route path="timeline" element={<Timeline />} />
+            <Route path="nearby" element={<NearbyCare />} />
+            <Route path="prescription-analyzer" element={<PrescriptionAnalyzer />} />
+            <Route path="diet" element={<Diet />} />
+            <Route path="lifestyle" element={<Lifestyle />} />
+            <Route path="nutrition" element={<Navigate to="/app/diet" replace />} />
+            {/* PDF export lives on each lab report's page. */}
+            <Route path="exports" element={<Navigate to="/app/reports" replace />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>

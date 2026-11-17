@@ -30,12 +30,24 @@ def enqueue_document_processing(document: MedicalDocument) -> ProcessingTask:
     document.status = MedicalDocument.Status.QUEUED
     document.save(update_fields=["status", "updated_at"])
 
-    def _send():
-        result = process_document.delay(str(task.id))
-        ProcessingTask.objects.filter(pk=task.pk).update(celery_task_id=result.id or "")
+    from django.conf import settings
 
-    transaction.on_commit(_send)
+    if getattr(settings, "DOCUMENT_QUEUE_BACKEND", "celery") == "celery" or settings.CELERY_TASK_ALWAYS_EAGER:
+        def _send():
+            result = process_document.delay(str(task.id))
+            ProcessingTask.objects.filter(pk=task.pk).update(celery_task_id=result.id or "")
+
+        transaction.on_commit(_send)
+    # "db" backend: the row itself is the queue entry; `manage.py process_documents` picks it up.
     return task
+
+
+def register_default_pipeline() -> None:
+    """Phase 4–5 pipeline: OCR/text extraction + classification + lab/prescription extraction."""
+    from .analysis import analyze_step
+
+    if not any(step is analyze_step for _, step in PIPELINE):
+        PIPELINE.append((ProcessingTask.TaskType.OCR, analyze_step))
 
 
 def _mark(task, **fields):

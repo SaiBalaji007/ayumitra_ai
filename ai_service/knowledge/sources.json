@@ -1,0 +1,510 @@
+{
+  "description": "Trusted medical knowledge sources for AyuMitra AI. Add a source only after checking its licence. MedlinePlus A.D.A.M. encyclopedia (/ency/) and ASHP drug monographs (/druginfo/) are licensed content and must NOT be added.",
+  "sources": [
+    {
+      "id": "mlp-lab-hemoglobin-test",
+      "title": "Hemoglobin Test",
+      "url": "https://medlineplus.gov/lab-tests/hemoglobin-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-hemoglobin-a1c-hba1c-test",
+      "title": "Hemoglobin A1C (HbA1c) Test",
+      "url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-blood-glucose-test",
+      "title": "Blood Glucose Test",
+      "url": "https://medlineplus.gov/lab-tests/blood-glucose-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-cholesterol-levels",
+      "title": "Cholesterol Levels",
+      "url": "https://medlineplus.gov/lab-tests/cholesterol-levels/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-complete-blood-count-cbc",
+      "title": "Complete Blood Count (CBC)",
+      "url": "https://medlineplus.gov/lab-tests/complete-blood-count-cbc/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-creatinine-test",
+      "title": "Creatinine Test",
+      "url": "https://medlineplus.gov/lab-tests/creatinine-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-liver-function-tests",
+      "title": "Liver Function Tests",
+      "url": "https://medlineplus.gov/lab-tests/liver-function-tests/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-vitamin-d-test",
+      "title": "Vitamin D Test",
+      "url": "https://medlineplus.gov/lab-tests/vitamin-d-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-triglycerides-test",
+      "title": "Triglycerides Test",
+      "url": "https://medlineplus.gov/lab-tests/triglycerides-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-platelet-tests",
+      "title": "Platelet Tests",
+      "url": "https://medlineplus.gov/lab-tests/platelet-tests/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-white-blood-count-wbc",
+      "title": "White Blood Count (WBC)",
+      "url": "https://medlineplus.gov/lab-tests/white-blood-count-wbc/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-uric-acid-test",
+      "title": "Uric Acid Test",
+      "url": "https://medlineplus.gov/lab-tests/uric-acid-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-basic-metabolic-panel-bmp",
+      "title": "Basic Metabolic Panel (BMP)",
+      "url": "https://medlineplus.gov/lab-tests/basic-metabolic-panel-bmp/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-ferritin-blood-test",
+      "title": "Ferritin Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/ferritin-blood-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-tsh-thyroid-stimulating-hormone-test",
+      "title": "TSH (Thyroid-Stimulating Hormone) Test",
+      "url": "https://medlineplus.gov/lab-tests/tsh-thyroid-stimulating-hormone-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-thyroxine-t4-test",
+      "title": "Thyroxine (T4) Test",
+      "url": "https://medlineplus.gov/lab-tests/thyroxine-t4-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-alt-blood-test",
+      "title": "ALT Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/alt-blood-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-ast-test",
+      "title": "AST Test",
+      "url": "https://medlineplus.gov/lab-tests/ast-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-bilirubin-blood-test",
+      "title": "Bilirubin Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/bilirubin-blood-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-sodium-blood-test",
+      "title": "Sodium Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/sodium-blood-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-potassium-blood-test",
+      "title": "Potassium Blood Test",
+      "url": "https://medlineplus.gov/lab-tests/potassium-blood-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-erythrocyte-sedimentation-rate-esr",
+      "title": "Erythrocyte Sedimentation Rate (ESR)",
+      "url": "https://medlineplus.gov/lab-tests/erythrocyte-sedimentation-rate-esr/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-c-reactive-protein-crp-test",
+      "title": "C-Reactive Protein (CRP) Test",
+      "url": "https://medlineplus.gov/lab-tests/c-reactive-protein-crp-test/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-lab-red-blood-cell-rbc-count",
+      "title": "Red Blood Cell (RBC) Count",
+      "url": "https://medlineplus.gov/lab-tests/red-blood-cell-rbc-count/",
+      "domain": "lab_tests",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#mplus-content"
+    },
+    {
+      "id": "mlp-topic-diabetes",
+      "title": "Diabetes",
+      "url": "https://medlineplus.gov/diabetes.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-highbloodpressure",
+      "title": "High Blood Pressure",
+      "url": "https://medlineplus.gov/highbloodpressure.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-cholesterol",
+      "title": "Cholesterol",
+      "url": "https://medlineplus.gov/cholesterol.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-anemia",
+      "title": "Anemia",
+      "url": "https://medlineplus.gov/anemia.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-hypothyroidism",
+      "title": "Hypothyroidism",
+      "url": "https://medlineplus.gov/hypothyroidism.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-kidneydiseases",
+      "title": "Kidney Diseases",
+      "url": "https://medlineplus.gov/kidneydiseases.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-vitamind",
+      "title": "Vitamin D",
+      "url": "https://medlineplus.gov/vitamind.html",
+      "domain": "general",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "dailymed-metformin",
+      "title": "Metformin hydrochloride tablets (FDA label, DailyMed setid 0230a3c3-34cf-478b-88c3-4d96e5300018)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/0230a3c3-34cf-478b-88c3-4d96e5300018.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-amlodipine",
+      "title": "Amlodipine besylate tablets (FDA label, DailyMed setid ac0dd8fb-ebe1-4d02-bd0d-4f979c6e3608)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/ac0dd8fb-ebe1-4d02-bd0d-4f979c6e3608.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-atorvastatin",
+      "title": "Atorvastatin calcium tablets (FDA label, DailyMed setid 4e06b20d-cc5d-46eb-991b-5972248de3af)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/4e06b20d-cc5d-46eb-991b-5972248de3af.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-acetaminophen",
+      "title": "Acetaminophen (paracetamol) tablets (FDA label, DailyMed setid 9cdfa6fb-4bc5-4a54-93fc-edd84bf80ef3)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/9cdfa6fb-4bc5-4a54-93fc-edd84bf80ef3.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-pantoprazole",
+      "title": "Pantoprazole delayed-release tablets (FDA label, DailyMed setid 5f1f2694-3965-2cc7-e063-6294a90a87ed)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/5f1f2694-3965-2cc7-e063-6294a90a87ed.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-cetirizine",
+      "title": "Cetirizine hydrochloride tablets (FDA label, DailyMed setid 03c0a599-072a-10ef-e063-6394a90a9698)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/03c0a599-072a-10ef-e063-6394a90a9698.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-amoxicillin",
+      "title": "Amoxicillin capsules (FDA label, DailyMed setid d37f2e3c-01f0-4a81-a46f-1615b82e2499)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/d37f2e3c-01f0-4a81-a46f-1615b82e2499.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "dailymed-levothyroxine",
+      "title": "Levothyroxine sodium tablets (FDA label, DailyMed setid 8849620a-5e8d-4031-884f-9a2817b050f2)",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/services/v2/spls/8849620a-5e8d-4031-884f-9a2817b050f2.xml",
+      "domain": "medicines",
+      "publisher": "DailyMed, U.S. National Library of Medicine (FDA-approved labeling)",
+      "license": "Public domain: U.S. FDA labeling distributed by NLM DailyMed. Dosage sections intentionally not ingested."
+    },
+    {
+      "id": "mlp-topic-nutrition",
+      "title": "Nutrition",
+      "url": "https://medlineplus.gov/nutrition.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-dasheatingplan",
+      "title": "DASH Eating Plan",
+      "url": "https://medlineplus.gov/dasheatingplan.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-diabeticdiet",
+      "title": "Diabetic Diet",
+      "url": "https://medlineplus.gov/diabeticdiet.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-sodium",
+      "title": "Sodium",
+      "url": "https://medlineplus.gov/sodium.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-dietaryfiber",
+      "title": "Dietary Fiber",
+      "url": "https://medlineplus.gov/dietaryfiber.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-iron",
+      "title": "Iron",
+      "url": "https://medlineplus.gov/iron.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-dietaryfats",
+      "title": "Dietary Fats",
+      "url": "https://medlineplus.gov/dietaryfats.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-howtolowercholesterolwithdiet",
+      "title": "How to Lower Cholesterol with Diet",
+      "url": "https://medlineplus.gov/howtolowercholesterolwithdiet.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-carbohydrates",
+      "title": "Carbohydrates",
+      "url": "https://medlineplus.gov/carbohydrates.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-dietaryproteins",
+      "title": "Dietary Proteins",
+      "url": "https://medlineplus.gov/dietaryproteins.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-exerciseandphysicalfitness",
+      "title": "Exercise and Physical Fitness",
+      "url": "https://medlineplus.gov/exerciseandphysicalfitness.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-weightcontrol",
+      "title": "Weight Control",
+      "url": "https://medlineplus.gov/weightcontrol.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-smoking",
+      "title": "Smoking",
+      "url": "https://medlineplus.gov/smoking.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-sleepdisorders",
+      "title": "Sleep Disorders",
+      "url": "https://medlineplus.gov/sleepdisorders.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-stress",
+      "title": "Stress",
+      "url": "https://medlineplus.gov/stress.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-healthyliving",
+      "title": "Healthy Living",
+      "url": "https://medlineplus.gov/healthyliving.html",
+      "domain": "lifestyle",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-vitamine",
+      "title": "Vitamin E",
+      "url": "https://medlineplus.gov/vitamine.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    },
+    {
+      "id": "mlp-topic-vitamins",
+      "title": "Vitamins",
+      "url": "https://medlineplus.gov/vitamins.html",
+      "domain": "nutrition",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
+      "content_selector": "#topic-summary"
+    }
+  ]
+}

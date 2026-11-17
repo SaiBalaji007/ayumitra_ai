@@ -39,6 +39,9 @@ class MedicalDocument(TimeStampedModel):
     title = models.CharField(max_length=200, blank=True)
     document_date = models.DateField(null=True, blank=True, help_text="Date printed on the document, if known.")
     error_message = models.TextField(blank=True)
+    # The classifier's opinion is stored as a suggestion; it never overrides the user's chosen type.
+    suggested_type = models.CharField(max_length=24, choices=DocumentType.choices, blank=True)
+    classification_confidence = models.FloatField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

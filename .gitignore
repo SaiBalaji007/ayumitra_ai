@@ -41,3 +41,10 @@ datasets/
 *.sqlite3-wal
 *.sqlite3-shm
 *.sqlite3-journal
+
+# AI service: virtualenv, model weights, inference runtime, vector store, corpora
+ai_service/.venv/
+ai_service/models/
+ai_service/runtime/
+ai_service/data/
+*.gguf
