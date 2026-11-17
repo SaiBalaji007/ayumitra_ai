@@ -20,6 +20,10 @@ TRUSTED_HOSTS = {
     "www.ncbi.nlm.nih.gov",
     "pubmed.ncbi.nlm.nih.gov",
     "www.nhs.uk",
+    # U.S. federal agencies (public domain): used for typical reference ranges
+    "www.nhlbi.nih.gov",
+    "www.niddk.nih.gov",
+    "www.cdc.gov",
 }
 
 DEFAULT_SKIP_HEADINGS = {
@@ -100,7 +104,9 @@ def load_html(html: str, *, content_selector: str | None = None, skip_headings: 
             sections.append(RawSection(heading_path=[h for _, h in path], text=text))
         buffer.clear()
 
-    for el in root.find_all(["h1", "h2", "h3", "h4", "p", "li", "td", "dd", "dt"]):
+    # "th" too: many tables put the row label in a header cell ("Hemoglobin" | "Adult men: 14 to 17 gm/dL");
+    # without it the values would lose the test they belong to.
+    for el in root.find_all(["h1", "h2", "h3", "h4", "p", "li", "th", "td", "dd", "dt"]):
         if el.name in ("h1", "h2", "h3", "h4"):
             flush()
             level = int(el.name[1])

@@ -25,7 +25,8 @@ td { border-bottom: 1px solid #e4e7ef; padding: 3pt; font-size: 9pt; }
 .box { border: 1px solid #c9cfdc; padding: 6pt; margin-top: 6pt; }
 """
 
-STATUS = {"above": "Above lab range", "below": "Below lab range", "within": "Within lab range", "unknown": "No range printed"}
+STATUS = {"above": "Above lab range", "below": "Below lab range", "within": "Within lab range",
+          "matches": "Matches reference", "differs": "Differs from reference", "unknown": "Not compared"}
 
 
 def _e(v) -> str:

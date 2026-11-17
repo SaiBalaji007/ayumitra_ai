@@ -138,3 +138,33 @@ class RecommendationTests(APITestCase):
         text = str(body).lower()
         for banned in (" mg", " iu", "mcg", "units a day", "cure"):
             self.assertNotIn(banned, text)
+
+
+class ParamRangeStatusTests(__import__("django").test.SimpleTestCase):
+    """Status for every way a lab prints a result (numbers, ranged counts, words)."""
+
+    def status(self, value_text, ref_text, numeric=None):
+        from types import SimpleNamespace
+        from medical_reports.logic import param_range_status, parse_range, to_decimal
+        lo, hi = parse_range(ref_text)
+        if lo is not None and hi is not None and lo > hi:
+            lo = hi = None
+        return param_range_status(SimpleNamespace(value_text=value_text, reference_range_text=ref_text,
+                                                  value_numeric=to_decimal(numeric), reference_low=lo, reference_high=hi))
+
+    def test_numbers(self):
+        self.assertEqual(self.status("6.0", "4.5-8", "6.0"), "within")
+        self.assertEqual(self.status("9.1", "4.5-8", "9.1"), "above")
+
+    def test_ranged_counts_compare_both_ends(self):
+        self.assertEqual(self.status("2-3", "0-5"), "within")
+        self.assertEqual(self.status("3-6", "0-5"), "above")
+
+    def test_word_results_neutral_match_or_differ(self):
+        self.assertEqual(self.status("Negative", "Negative"), "matches")
+        self.assertEqual(self.status("Pale  Yellow", "pale yellow"), "matches")
+        self.assertEqual(self.status("Positive", "Negative"), "differs")
+
+    def test_nothing_to_compare(self):
+        self.assertEqual(self.status("Absent", ""), "unknown")
+        self.assertEqual(self.status("6.0", "45-8", "6.0"), "unknown")  # unreadable range: never a verdict

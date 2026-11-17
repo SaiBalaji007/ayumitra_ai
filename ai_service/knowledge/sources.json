@@ -505,6 +505,33 @@
       "publisher": "MedlinePlus, U.S. National Library of Medicine",
       "license": "Public domain: text written by the U.S. National Library of Medicine (NLM). Credit MedlinePlus; no endorsement implied.",
       "content_selector": "#topic-summary"
+    },
+    {
+      "id": "nhlbi-anemia-diagnosis",
+      "title": "Anemia: Diagnosis",
+      "url": "https://www.nhlbi.nih.gov/health/anemia/diagnosis",
+      "domain": "lab_tests",
+      "publisher": "National Heart, Lung, and Blood Institute (NHLBI), NIH",
+      "license": "Public domain: work of the U.S. federal government (NHLBI, NIH); credit the agency, no endorsement implied.",
+      "content_selector": "main"
+    },
+    {
+      "id": "cdc-diabetes-testing",
+      "title": "Diabetes Testing",
+      "url": "https://www.cdc.gov/diabetes/diabetes-testing/index.html",
+      "domain": "lab_tests",
+      "publisher": "Centers for Disease Control and Prevention (CDC)",
+      "license": "Public domain: work of the U.S. federal government (CDC); credit the agency, no endorsement implied.",
+      "content_selector": "main"
+    },
+    {
+      "id": "niddk-diabetes-tests-diagnosis",
+      "title": "Diabetes Tests & Diagnosis",
+      "url": "https://www.niddk.nih.gov/health-information/diabetes/overview/tests-diagnosis",
+      "domain": "lab_tests",
+      "publisher": "National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK), NIH",
+      "license": "Public domain: work of the U.S. federal government (NIDDK, NIH); credit the agency, no endorsement implied.",
+      "content_selector": "main"
     }
   ]
 }

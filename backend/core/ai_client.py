@@ -43,9 +43,14 @@ def _request(path: str, *, body: bytes, content_type: str, extra_headers: dict |
         raise AIServiceError(f"AI service unreachable at {settings.AI_SERVICE_URL}: {exc}") from exc
 
 
-def analyze_document(data: bytes, content_type: str) -> dict:
+def analyze_document(data: bytes, content_type: str, document_type: str = "") -> dict:
+    """document_type: the type the user chose at upload ("" if unknown); the AI service extracts lab
+    results or prescription lines for that type even when its own classifier is unsure (noisy scans)."""
+    headers = {"X-Document-Content-Type": content_type}
+    if document_type:
+        headers["X-Document-Type"] = document_type
     return _request("/v1/documents/analyze", body=data, content_type="application/octet-stream",
-                    extra_headers={"X-Document-Content-Type": content_type}, timeout=settings.AI_SERVICE_OCR_TIMEOUT)
+                    extra_headers=headers, timeout=settings.AI_SERVICE_OCR_TIMEOUT)
 
 
 def run_agent(payload: dict) -> dict:

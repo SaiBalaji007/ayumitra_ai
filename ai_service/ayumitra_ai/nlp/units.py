@@ -29,6 +29,7 @@ CANONICAL = {
     "nmol/l": "nmol/L", "pmol/l": "pmol/L", "mmol/mol": "mmol/mol", "ml/min": "mL/min",
     "ml/min/1.73m2": "mL/min/1.73m²", "ml/min/1.73 m2": "mL/min/1.73m²", "u/ml": "U/mL", "iu/ml": "IU/mL",
     "mu/l": "mU/L", "ku/l": "kU/L", "sec": "s", "secs": "s", "seconds": "s",
+    "ml": "mL", "/hpf": "/hpf", "/lpf": "/lpf",
     "10^9/l": "10^9/L", "x10^9/l": "10^9/L", "10^12/l": "10^12/L", "x10^12/l": "10^12/L",
 }
 
@@ -40,11 +41,11 @@ EXACT_CONVERSIONS = {
 }
 
 UNIT_PATTERN = re.compile(
-    r"(?:x\s*)?(?:10\^?\d/(?:u|µ|μ)l|thou/ul|mill(?:ion)?/cumm|lakhs?/(?:cumm|ul)|lacs/cumm|cells/(?:cumm|u?l|µl)|/cumm|"
+    r"(?:x\s*)?(?:10(?:\^?\d|[³⁶])/(?:u|µ|μ)l|thou/ul|mill(?:ion)?/cumm|lakhs?/(?:cumm|ul)|lacs/cumm|cells/(?:cumm|u?l|µl)|/cumm|"
     r"mgs?/dl|gms?/dl|g/dl|mg%|gm%|g%|mmol/l|[uµμ]mol/l|ng/ml|pg/ml|[uµ]g/dl|mcg/dl|m?iu/l|[uµ]iu/ml|miu/ml|u/l|"
     r"meq/l|mm/hr?|mmhg|fl|pg|%|"
     r"10\^?(?:9|12)/l|ml/min(?:/1\.73\s*m2)?|mmol/mol|[nmp]mol/l|mgs?/l|gms?/l|g/l|[uµμ]g/(?:l|ml)|mcg/(?:l|ml)|"
-    r"ng/(?:l|dl)|mg/ml|k?iu/ml|[uµ]/ml|m?u/l|ku/l|sec(?:onds|s)?)",
+    r"ng/(?:l|dl)|mg/ml|k?iu/ml|[uµ]/ml|m?u/l|ku/l|sec(?:onds|s)?|ml\b|/[hl]pf\b)",
     re.IGNORECASE,
 )
 
@@ -58,7 +59,7 @@ class NormalizedUnit:
 
 def normalize_unit(unit: str) -> NormalizedUnit:
     u = unit.strip()
-    key = re.sub(r"\s+", "", u.lower()).replace("μ", "µ").lstrip("x")
+    key = re.sub(r"\s+", "", u.lower()).replace("μ", "µ").replace("³", "^3").replace("⁶", "^6").lstrip("x")
     canonical = CANONICAL.get(key)
     return NormalizedUnit(printed=u, canonical=canonical, known=canonical is not None)
 

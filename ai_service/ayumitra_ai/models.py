@@ -18,6 +18,15 @@ import numpy as np
 from .text import content_terms, tokenize
 
 
+def _load_cached_first(cls, model_id: str, device: str):
+    """Load from the local Hugging Face cache without touching the network (works offline, starts faster);
+    only download when the model isn't cached yet (first run on a new machine)."""
+    try:
+        return cls(model_id, device=device, local_files_only=True)
+    except Exception:  # noqa: BLE001 - not cached (or partial): fall back to a normal download
+        return cls(model_id, device=device)
+
+
 def model_slug(model_id: str) -> str:
     """'sentence-transformers/all-MiniLM-L6-v2' -> 'all-minilm-l6-v2' (safe for collection names)."""
     name = model_id.rstrip("/").split("/")[-1].lower()
@@ -42,7 +51,7 @@ class SentenceTransformerEmbedder:
         from sentence_transformers import SentenceTransformer
 
         self.model_id = model_id
-        self._model = SentenceTransformer(model_id, device=device)
+        self._model = _load_cached_first(SentenceTransformer, model_id, device)
         self.dim = int(self._model.get_sentence_embedding_dimension())
         self._qp, self._pp = query_prefix, passage_prefix
 
@@ -93,7 +102,7 @@ class CrossEncoderReranker:
         from sentence_transformers import CrossEncoder
 
         self.model_id = model_id
-        self._model = CrossEncoder(model_id, device=device)
+        self._model = _load_cached_first(CrossEncoder, model_id, device)
 
     def score(self, query: str, passages: list[str]) -> list[float]:
         if not passages:
@@ -134,7 +143,7 @@ class CrossEncoderNLI:
         from sentence_transformers import CrossEncoder
 
         self.model_id = model_id
-        self._model = CrossEncoder(model_id, device=device)
+        self._model = _load_cached_first(CrossEncoder, model_id, device)
         id2label = getattr(self._model.model.config, "id2label", None) or {}
         labels = {int(k): str(v).lower() for k, v in id2label.items()}
         self._entail_idx = next((i for i, lab in labels.items() if "entail" in lab), 1)

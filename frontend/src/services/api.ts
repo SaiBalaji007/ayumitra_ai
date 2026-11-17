@@ -170,7 +170,8 @@ export const documentsApi = {
 
 // ---------- Reports, prescriptions, assistant, timeline ----------
 
-export type RangeStatus = 'below' | 'within' | 'above' | 'unknown'
+/** 'matches' / 'differs': a word result ("Negative") compared with a word reference, never interpreted further. */
+export type RangeStatus = 'below' | 'within' | 'above' | 'matches' | 'differs' | 'unknown'
 
 export type LabParameter = {
   id: number
@@ -185,9 +186,26 @@ export type LabParameter = {
   lab_flag: string
   lab_flag_display: string
   range_status: RangeStatus
+  /** 'lab' = compared with the lab's printed range; 'typical' = with a cited typical range (none printed). */
+  range_source: 'lab' | 'typical' | ''
+  typical_range: TypicalRange | null
   confidence: number | null
   user_verified: boolean
 }
+
+export type TypicalRangeOption = {
+  sex: 'any' | 'male' | 'female'
+  display: string
+  publisher: string
+  source_title: string
+  url: string
+  quote: string
+  comparable: boolean
+  unit: string
+}
+
+/** A typical adult range quoted from a public-domain source, used only when the report printed no range. */
+export type TypicalRange = { selected: TypicalRangeOption | null; options: TypicalRangeOption[] }
 
 export type Citation = {
   id: string

@@ -21,7 +21,7 @@ from decimal import Decimal
 
 from django.db.models import F as DbF
 
-from .logic import range_status
+from .logic import range_info
 from .models import LabParameter
 
 SOURCES = {
@@ -442,7 +442,7 @@ def _latest_findings(user) -> tuple[dict, int, str | None]:
         latest = max(latest, rdate) if latest else rdate
         if key in out:
             continue
-        rs = range_status(p.value_numeric, p.reference_low, p.reference_high)
+        rs = range_info(p)["status"]
         direction = {"above": "high", "below": "low"}.get(rs)
         if not direction and p.lab_flag:
             direction = {"high": "high", "critical_high": "high", "low": "low", "critical_low": "low"}.get(p.lab_flag)

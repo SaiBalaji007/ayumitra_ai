@@ -12,7 +12,7 @@ from core.audit import audit
 from core.models import AuditLog
 from core.permissions import IsOwner
 
-from .logic import parameter_context, range_status
+from .logic import parameter_context, range_info
 from .recommendations import build_recommendations
 from .models import ExtractedReport, LabParameter, MedicalFinding
 from .serializers import ExtractedReportSerializer, LabParameterSerializer, MedicalFindingSerializer
@@ -143,7 +143,7 @@ def timeline(request):
             "unit": p.unit, "reference_range_text": p.reference_range_text,
             "reference_low": float(p.reference_low) if p.reference_low is not None else None,
             "reference_high": float(p.reference_high) if p.reference_high is not None else None,
-            "lab_flag": p.lab_flag, "range_status": range_status(p.value_numeric, p.reference_low, p.reference_high),
+            "lab_flag": p.lab_flag, "range_status": range_info(p)["status"],
             "user_verified": p.user_verified,
         })
     points.sort(key=lambda x: x["date"])

@@ -44,7 +44,9 @@ def analyze_step(document: MedicalDocument, report) -> None:
     with document.file.open("rb") as fh:
         data = fh.read()
     report(15, "Extracting text")
-    result = analyze_document(data, document.content_type)
+    chosen = document.document_type if document.document_type in (
+        MedicalDocument.DocumentType.LAB_REPORT, MedicalDocument.DocumentType.PRESCRIPTION) else ""
+    result = analyze_document(data, document.content_type, chosen)
     report(70, "Saving results")
     _store(document, result)
     report(100, "Done")
@@ -79,17 +81,23 @@ def _store(document: MedicalDocument, result: dict) -> None:
     ExtractedReport.objects.filter(document=document).delete()
     if result.get("lab_results"):
         rep = ExtractedReport.objects.create(document=document, extractor_version=str(result.get("versions", {})), raw=meta)
+        typical = {}  # parameter id -> cited typical ranges, for results whose report printed no range
         for r in result["lab_results"]:
             lo, hi = _dec(r.get("reference_low")), _dec(r.get("reference_high"))
             if lo is not None and hi is not None and lo > hi:  # never store an impossible range
                 lo = hi = None
-            LabParameter.objects.create(
+            lp = LabParameter.objects.create(
                 report=rep, page=pages.get(r.get("page")), name_as_printed=r["name_as_printed"][:200],
                 normalized_name=r.get("normalized_name", "")[:120], value_text=r["value_text"][:100],
                 value_numeric=_dec(r.get("value_numeric")), unit=(r.get("unit") or "")[:40],
                 reference_range_text=(r.get("reference_range_text") or "")[:120], reference_low=lo, reference_high=hi,
                 lab_flag=FLAG_MAP.get(r.get("lab_flag", ""), ""), confidence=r.get("confidence"),
             )
+            if r.get("typical_ranges"):
+                typical[str(lp.pk)] = r["typical_ranges"]
+        if typical:
+            rep.raw = {**meta, "typical_ranges": typical}
+            rep.save(update_fields=["raw", "updated_at"])
 
     Prescription.objects.filter(document=document).delete()
     if result.get("prescription_items"):

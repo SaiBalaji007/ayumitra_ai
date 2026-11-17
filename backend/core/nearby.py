@@ -6,6 +6,7 @@ Nearby hospitals, clinics, doctors and pharmacies from OpenStreetMap (Phase 2).
 1. Nominatim turns "locality, city" into coordinates (the city/locality centre, not the user's location).
 2. Overpass returns OSM medical facilities within the radius; all configured mirrors are asked in parallel
    and the first successful answer wins, so a 429/504 or a hanging server doesn't block the search.
+3. If every Overpass server fails, Nominatim's amenity search (same OSM data, fewer results) is used instead.
 Results are cached (24 h) so repeated searches don't hit the community servers again. Only data present in
 OSM is returned: missing phone/hours/website stay empty and the UI shows "Not available".
 """
@@ -16,6 +17,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 import math
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -80,7 +82,7 @@ def _overpass_query(lat: float, lon: float, radius_m: int, category: str) -> str
     return f"[out:json][timeout:25];({parts});out center tags 300;"
 
 
-OVERPASS_TIMEOUT_S = 35
+OVERPASS_TIMEOUT_S = 25  # then fall back to Nominatim instead of keeping the user waiting
 
 
 def _overpass_one(url: str, query: str) -> list[dict]:
@@ -99,11 +101,49 @@ def overpass(query: str) -> list[dict]:
         for fut in as_completed(futures):
             try:
                 return fut.result()
-            except (urllib.error.URLError, TimeoutError, ValueError, OSError) as exc:
+            except Exception as exc:  # any single mirror failing (incl. truncated replies) just means: try the next
                 errors.append(f"{urllib.parse.urlsplit(futures[fut]).netloc}: {exc}")
     finally:
         pool.shutdown(wait=False, cancel_futures=True)
     raise UpstreamError("all Overpass servers failed: " + "; ".join(errors))
+
+
+# Fallback when every Overpass server fails: Nominatim's amenity search inside the radius' bounding box.
+# Same OpenStreetMap data, but at most 50 results per type and no healthcare=* / shop=chemist tags.
+NOMINATIM_AMENITY = {"hospital": "hospital", "clinic": "clinic", "pharmacy": "pharmacy", "doctor": "doctors"}
+NOMINATIM_PAUSE_S = 1.0  # Nominatim usage policy: at most one request per second
+
+
+def nominatim_pois(lat: float, lon: float, radius_km: int, category: str) -> list[dict]:
+    """Return Overpass-shaped elements (type, id, lat, lon, tags) so to_facilities() handles both sources."""
+    dlat = radius_km / 111.0
+    dlon = radius_km / (111.0 * max(math.cos(math.radians(lat)), 0.01))
+    viewbox = f"{lon - dlon},{lat + dlat},{lon + dlon},{lat - dlat}"
+    cats = list(NOMINATIM_AMENITY) if category == "all" else [category]
+    elements, errors = [], []
+    for i, cat in enumerate(cats):
+        if i:
+            time.sleep(NOMINATIM_PAUSE_S)
+        url = settings.GEOCODER_URL + "?" + urllib.parse.urlencode({
+            "amenity": NOMINATIM_AMENITY[cat], "viewbox": viewbox, "bounded": 1, "countrycodes": "in",
+            "format": "jsonv2", "limit": 50, "extratags": 1, "addressdetails": 1})
+        try:
+            rows = _get_json(url, timeout=15)
+        except (urllib.error.URLError, TimeoutError, ValueError, OSError) as exc:
+            errors.append(f"{cat}: {exc}")
+            continue
+        for r in rows:
+            addr = r.get("address") or {}
+            tags = {**(r.get("extratags") or {}), "amenity": NOMINATIM_AMENITY[cat], "name": r.get("name") or "",
+                    "addr:housenumber": addr.get("house_number"), "addr:street": addr.get("road"),
+                    "addr:suburb": addr.get("suburb") or addr.get("neighbourhood"),
+                    "addr:city": addr.get("city") or addr.get("town") or addr.get("village"),
+                    "addr:postcode": addr.get("postcode")}
+            elements.append({"type": r.get("osm_type"), "id": r.get("osm_id"), "lat": float(r["lat"]),
+                             "lon": float(r["lon"]), "tags": {k: v for k, v in tags.items() if v}})
+    if errors and len(errors) == len(cats):
+        raise UpstreamError("nominatim fallback failed: " + "; ".join(errors))
+    return elements
 
 
 def _distance_km(lat1, lon1, lat2, lon2) -> float:
@@ -179,13 +219,19 @@ def nearby(request):
         if place is None:
             return Response({"detail": f"Couldn't find \"{', '.join(p for p in (locality, city) if p)}\". Check the spelling.",
                              "code": "place_not_found"}, status=404)
-        facilities = to_facilities(overpass(_overpass_query(place["lat"], place["lon"], radius * 1000, category)),
-                                   place["lat"], place["lon"])
+        try:
+            elements = overpass(_overpass_query(place["lat"], place["lon"], radius * 1000, category))
+            source = "overpass"
+        except UpstreamError as exc:
+            log.warning("Overpass unavailable, using Nominatim fallback: %s", exc)
+            elements = nominatim_pois(place["lat"], place["lon"], radius, category)
+            source = "nominatim"
+        facilities = [f for f in to_facilities(elements, place["lat"], place["lon"]) if f["distance_km"] <= radius]
     except UpstreamError as exc:
         log.warning("Nearby search failed: %s", exc)
         return Response({"detail": "The map service is busy or unreachable right now. Please try again in a minute.",
                          "code": "map_service_unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    body = {"place": place, "radius_km": radius, "category": category, "count": len(facilities),
+    body = {"place": place, "radius_km": radius, "category": category, "count": len(facilities), "source": source,
             "facilities": facilities, "attribution": "Data © OpenStreetMap contributors (ODbL)"}
     cache.set(key, body, CACHE_S)
     return Response({**body, "cached": False})

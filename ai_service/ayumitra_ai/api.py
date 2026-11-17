@@ -122,28 +122,45 @@ def lexicon():
     return default_lexicon()
 
 
-def analyze_bytes(data: bytes, content_type: str) -> dict:
-    """OCR/text extraction -> classification -> lab or prescription extraction. No LLM involved."""
+def analyze_bytes(data: bytes, content_type: str, document_type: str = "") -> dict:
+    """OCR/text extraction -> classification -> lab or prescription extraction. No LLM involved.
+
+    document_type: the user's choice at upload. It decides which extraction runs, because the user
+    knows what they uploaded and the keyword classifier can miss on noisy scans; the classifier's own
+    verdict is still returned unchanged."""
     from .documents.classify import classify
-    from .documents.extract import extract_document
+    from .documents.extract import extract_document, visual_rows
     from .nlp.lab_extraction import extract_from_table, extract_lab_results
     from .nlp.prescriptions import extract_prescription
+    from .reference_ranges import typical_ranges
 
     ex = extract_document(data, content_type)
     text = ex.text
     cls = classify(text)
+    kind = document_type if document_type in ("lab_report", "prescription") else cls.document_type
     labs, items = [], []
     for page in ex.pages:
         # OCR pages: text is already rebuilt into visual rows; each row inherits the page's OCR confidence.
         row_lines = page.text.splitlines()
         confs = [page.confidence] * len(row_lines) if page.method != "text_layer" else None
-        if cls.document_type == "lab_report":
+        if kind == "lab_report":
             found = extract_lab_results(row_lines, page=page.page_number, line_confidences=confs)
+            if page.method == "text_layer" and page.lines:
+                # PDFs that store each table cell as its own line: parse rows rebuilt from positions too,
+                # and keep whichever reading finds more results.
+                by_rows = extract_lab_results(visual_rows(page.lines), page=page.page_number)
+                if len(by_rows) > len(found):
+                    found = by_rows
             if not found:
                 for t in page.tables:
                     found.extend(extract_from_table(t.rows, page=page.page_number))
-            labs.extend(r.to_dict() for r in found)
-        elif cls.document_type == "prescription":
+            for r in found:
+                d = r.to_dict()
+                # No range printed on the report: offer cited typical ranges (shown as such, never as the lab's).
+                if not d["reference_range_text"]:
+                    d["typical_ranges"] = typical_ranges(d["normalized_name"], d["unit"])
+                labs.append(d)
+        elif kind == "prescription":
             items.extend(i.to_dict() for i in extract_prescription(row_lines, lexicon(), confs))
     return {
         "extraction": ex.to_dict(),
@@ -164,7 +181,7 @@ async def analyze_document(request: Request):
     if not data or len(data) > MAX_DOCUMENT_BYTES:
         raise HTTPException(status_code=413, detail="Document is empty or too large")
     try:
-        return analyze_bytes(data, content_type)
+        return analyze_bytes(data, content_type, request.headers.get("x-document-type", "").strip().lower())
     except Exception as exc:  # corrupt files etc.: report, never crash the service
         raise HTTPException(status_code=422, detail=f"Could not read the document: {type(exc).__name__}") from exc
 

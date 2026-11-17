@@ -103,11 +103,17 @@ def candidate_terms(question: str, max_terms: int = 5) -> list[str]:
 
 
 class ExternalSources:
+    CONNECT_TIMEOUT_S = 5.0
+    # After a failed connection, skip live lookups for this long (cached results still work) so an offline
+    # machine doesn't wait out a timeout per source per question.
+    OFFLINE_BACKOFF_S = 120.0
+
     def __init__(self, cache_dir: Path, *, timeout_s: float = 20.0, enabled: bool = True, wikipedia_contact: str = ""):
         self.cache_dir = Path(cache_dir)
         self.timeout_s = timeout_s
         self.enabled = enabled
         self.wikipedia_contact = wikipedia_contact.strip()
+        self._offline_until = 0.0
 
     # ------------------------------------------------------------------ http + cache
     def _get(self, url: str, params: dict, *, user_agent: str = USER_AGENT) -> str | None:
@@ -117,9 +123,17 @@ class ExternalSources:
         path = self.cache_dir / f"{key}.txt"
         if path.exists() and time.time() - path.stat().st_mtime < CACHE_TTL_S:
             return path.read_text(encoding="utf-8")
+        if time.monotonic() < self._offline_until:
+            return None  # no internet a moment ago: answer from local sources without waiting again
         try:
-            resp = httpx.get(url, params=params, headers={"User-Agent": user_agent}, timeout=self.timeout_s,
+            resp = httpx.get(url, params=params, headers={"User-Agent": user_agent},
+                             timeout=httpx.Timeout(self.timeout_s, connect=self.CONNECT_TIMEOUT_S),
                              follow_redirects=True)
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ProxyError) as exc:
+            self._offline_until = time.monotonic() + self.OFFLINE_BACKOFF_S
+            log.warning("No connection to external sources (%s): %s; using local sources only for %ds",
+                        url, exc, int(self.OFFLINE_BACKOFF_S))
+            return None
         except httpx.HTTPError as exc:
             log.warning("External source unreachable (%s): %s", url, exc)
             return None

@@ -12,7 +12,23 @@ This is the source of truth for what actually exists. It is updated after every 
 **Rule:** a module is only ✅ when its tests run green locally. AI modules additionally need
 evaluation results (see "Evaluation" below). Pretrained models only, no fine-tuning.
 
-_Last updated: 2026-11-14: Phase 1 (RAG), Phase 2 (hospital finder) and Phase 3 (prescription analyzer) implemented, tested and verified in the browser._
+_Last updated: 2026-11-18: report reading for more layouts, typical reference ranges, offline mode and map fallback (see "Updates 2026-11-18")._
+
+## Updates 2026-11-18
+
+All tests pass: backend 131, AI service 192, frontend 12. Synthetic evaluation set: extraction unchanged (0 documents differ).
+
+| Change | Status | Evidence |
+|---|---|---|
+| Table PDFs that store each cell as its own line: rows rebuilt from positions (`documents/extract.py:visual_rows`) | ✅ Tested | Sample CBC + biochemistry PDF: 14/14 rows, lab flags matched |
+| Ranges "Below 5.7" / "Above 40" / "Less than 200", Flag column after the range, `10³/µL`, `ml`, `/hpf` | ✅ Tested | `tests/test_lab_layouts.py` |
+| Urine (CUE) layout: `*` marks, methodology column, word results, ranged counts ("2-3" vs "0-5"); impossible OCR ranges ("45-8") never used for a verdict | ✅ Tested | Real CUE report: 19/19 rows (PNG), 17/19 (low-quality PDF scan) |
+| Word results: "Matches reference" (neutral) / "Differs from reference"; ranged counts compared on both ends | ✅ Tested | `medical_reports/test_recommendations.py::ParamRangeStatusTests` |
+| User's chosen document type decides which extraction runs (classifier can miss noisy scans) | ✅ Tested | Live re-processing |
+| Typical reference ranges when a report prints none: 15 entries / 11 tests in `knowledge/reference_ranges.json`, each quoted word for word from a public-domain source in the library (NHLBI, CDC, MedlinePlus); compared only when units match; sex-specific ranges chosen from the profile (nothing compared if sex not set); shown as "Typical … not printed by your lab" with the source | ✅ Tested | `tests/test_reference_ranges.py` (quotes verified against the library), `medical_reports/test_typical_ranges.py`, live end-to-end upload |
+| New library sources: NHLBI Anemia Diagnosis, CDC Diabetes Testing, NIDDK Diabetes Tests & Diagnosis (60 sources); HTML loader keeps table header cells (`th`) so values keep their test name | ✅ Tested | Ingested; quotes verified |
+| Offline mode: models load from the local cache first; external lookups connect-timeout 5 s and back off 2 min after a failed connection | ✅ Tested | `tests/test_external_offline.py`; simulated offline: answered from the library (36 s) and from Qwen general knowledge (50 s) |
+| Nearby care: Overpass mirrors queried in parallel with a lighter query; Nominatim fallback when all Overpass servers fail | ✅ Tested | `core/test_nearby.py` (12 tests); live: Visakhapatnam 92 places, Noida 11 hospitals |
 
 **Running locally:** frontend http://localhost:5173 · backend http://127.0.0.1:8000/api/ · AI service http://127.0.0.1:8001 (health: `/health`) · Qwen llama-server http://127.0.0.1:8081 (running, `/health` ok). Document worker: `python manage.py process_documents` (SQLite queue, `DOCUMENT_PROCESSING_ENABLED=True` in `.env`).
 

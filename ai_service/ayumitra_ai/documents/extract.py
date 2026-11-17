@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
-from .ocr import OcrUnavailable, group_rows, run_ocr
+from .ocr import OcrLine, OcrUnavailable, group_rows, run_ocr
 
 MIN_TEXT_CHARS_PER_PAGE = 40  # below this a PDF page is treated as scanned and OCR'd
 OCR_DPI = 300
@@ -139,6 +139,18 @@ def extract_pdf(data: bytes) -> ExtractionResult:
             warnings.append(f"Page {i} needs OCR but no OCR engine is available: {exc}")
             pages.append(Page(i, text, "text_layer", None))
     return ExtractionResult("application/pdf", pages, warnings)
+
+
+def visual_rows(lines: list[dict]) -> list[str]:
+    """Rebuild visual rows from positioned text lines. Many PDFs store every table cell as its own line
+    ("Haemoglobin", "13.8", "g/dL", ...); joining cells that sit on the same row gives
+    "Haemoglobin  13.8  g/dL  13.0 – 17.0  Normal", which the row parsers expect."""
+    boxed = [ln for ln in lines if ln.get("bbox")]
+    if not boxed:
+        return []
+    ocr_like = [OcrLine(ln["text"], 1.0, tuple(ln["bbox"]))
+                for ln in sorted(boxed, key=lambda ln: ((ln["bbox"][1] + ln["bbox"][3]) / 2, ln["bbox"][0]))]
+    return ["  ".join(ln.text for ln in row) for row in group_rows(ocr_like)]
 
 
 def extract_document(data: bytes, content_type: str) -> ExtractionResult:

@@ -63,11 +63,12 @@ class NearbyTests(APITestCase):
         self.assertIn("OpenStreetMap", body["attribution"])
 
     def test_repeated_search_is_cached(self):
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([PLACE, ELEMENTS])) as m:
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([PLACE, ELEMENTS, ELEMENTS])) as m:
             self.get()
+            calls_first = m.call_count  # geocode + one call per Overpass mirror (asked in parallel)
             res = self.get()
         self.assertTrue(res.json()["cached"])
-        self.assertEqual(m.call_count, 2)  # one geocode + one Overpass call in total
+        self.assertEqual(m.call_count, calls_first)  # the repeat search made no network calls
 
     def test_unknown_city(self):
         with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([[]])):
@@ -82,10 +83,26 @@ class NearbyTests(APITestCase):
         self.assertEqual(res.json()["count"], 2)
 
     def test_all_servers_down_gives_clear_error(self):
-        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([PLACE, 504, 429])):
+        # both Overpass mirrors busy, then all four Nominatim fallback searches fail too
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([PLACE, 504, 429, 503, 503, 503, 503])), \
+                mock.patch("core.nearby.time.sleep"):
             res = self.get()
         self.assertEqual(res.status_code, 503)
         self.assertEqual(res.json()["code"], "map_service_unavailable")
+
+    def test_overpass_down_falls_back_to_nominatim(self):
+        hospital = [{"osm_type": "way", "osm_id": 9, "lat": "28.5400", "lon": "77.3910", "name": "Fallback Hospital",
+                     "extratags": {"phone": "+91 120 111 1111"}, "address": {"road": "Main Road", "city": "Noida"}},
+                    {"osm_type": "node", "osm_id": 10, "lat": "28.6000", "lon": "77.4500", "name": "Too Far Hospital"}]
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen([PLACE, 504, 504, hospital, [], [], []])), \
+                mock.patch("core.nearby.time.sleep"):
+            res = self.get()
+        self.assertEqual(res.status_code, 200, res.content)
+        body = res.json()
+        self.assertEqual(body["source"], "nominatim")
+        self.assertEqual([f["name"] for f in body["facilities"]], ["Fallback Hospital"])  # bbox corner outside radius dropped
+        f = body["facilities"][0]
+        self.assertEqual((f["category"], f["phone"], f["address"]), ("hospital", "+91 120 111 1111", "Main Road, Noida"))
 
     def test_hanging_mirror_does_not_block_a_working_one(self):
         def _open(req, timeout=None):

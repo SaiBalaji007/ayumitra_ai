@@ -11,11 +11,40 @@ import { Input } from '@/components/ui/input'
 import { formatDate } from '@/lib/format'
 import { apiErrorMessage, reportsApi, type ExtractedReport, type LabParameter, type RangeStatus } from '@/services/api'
 
-function RangeBadge({ status }: { status: RangeStatus }) {
-  if (status === 'above') return <Badge variant="warning"><ArrowUp className="size-3" /> Above range</Badge>
-  if (status === 'below') return <Badge variant="warning"><ArrowDown className="size-3" /> Below range</Badge>
-  if (status === 'within') return <Badge variant="success">Within range</Badge>
-  return <Badge variant="outline">No range printed</Badge>
+function RangeBadge({ status, hasRange, typical = false }: { status: RangeStatus; hasRange: boolean; typical?: boolean }) {
+  const range = typical ? 'typical range' : 'range'
+  if (status === 'above') return <Badge variant="warning"><ArrowUp className="size-3" /> Above {range}</Badge>
+  if (status === 'below') return <Badge variant="warning"><ArrowDown className="size-3" /> Below {range}</Badge>
+  if (status === 'within') return <Badge variant="success">Within {range}</Badge>
+  if (typical) return <Badge variant="outline">Not compared</Badge>
+  // Word results ("Negative" vs "Negative"): neutral, AyuMitra doesn't interpret them.
+  if (status === 'matches') return <Badge variant="secondary">Matches reference</Badge>
+  if (status === 'differs') return <Badge variant="warning">Differs from reference</Badge>
+  return <Badge variant="outline">{hasRange ? 'Not compared' : 'No range printed'}</Badge>
+}
+
+/** The report printed no range: show a cited typical adult range, clearly marked as not the lab's. */
+function TypicalRangeNote({ p }: { p: LabParameter }) {
+  const t = p.typical_range!
+  const shown = t.selected ? [t.selected] : t.options
+  const src = shown[0]
+  const why = !t.selected
+    ? 'Differs for men and women: add your sex in Settings to compare.'
+    : !t.selected.comparable
+      ? `Not compared: your result's unit differs from ${t.selected.unit}.`
+      : ''
+  return (
+    <div className="text-xs leading-snug">
+      <span className="text-foreground">Typical: {shown.map((o) => o.display).join(' · ')}</span>
+      <span className="mt-0.5 block">
+        Not printed by your lab. Source:{' '}
+        <a href={src.url} target="_blank" rel="noreferrer" title={`"${src.quote}"`} className="underline underline-offset-2">
+          {src.publisher}
+        </a>
+      </span>
+      {why && <span className="mt-0.5 block text-warning">{why}</span>}
+    </div>
+  )
 }
 
 function ReportList() {
@@ -80,10 +109,10 @@ function ParameterRow({ report, p }: { report: ExtractedReport; p: LabParameter 
       <td className="py-3 pr-3 text-muted-foreground tabular-nums">
         {editing ? (
           <Input aria-label="Reference range" className="h-8 w-28" value={form.reference_range_text} onChange={(e) => setForm({ ...form, reference_range_text: e.target.value })} />
-        ) : (p.reference_range_text || '-')}
+        ) : p.reference_range_text ? p.reference_range_text : p.typical_range ? <TypicalRangeNote p={p} /> : '-'}
       </td>
       <td className="py-3 pr-3">{p.lab_flag ? <Badge variant="outline">{p.lab_flag_display}</Badge> : <span className="text-xs text-muted-foreground">none</span>}</td>
-      <td className="py-3 pr-3"><RangeBadge status={p.range_status} /></td>
+      <td className="py-3 pr-3"><RangeBadge status={p.range_status} hasRange={Boolean(p.reference_range_text)} typical={p.range_source === 'typical'} /></td>
       <td className="py-3 text-right whitespace-nowrap">
         {editing ? (
           <>
