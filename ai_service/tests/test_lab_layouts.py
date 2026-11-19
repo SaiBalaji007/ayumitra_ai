@@ -108,3 +108,36 @@ def test_pdf_cells_rebuilt_into_rows():
     rows = visual_rows(lines)
     assert rows == ["Haemoglobin  13.8  g/dL  13.0 – 17.0  Normal", "MCV  85.5  fL  80 – 100"]
     assert [parse_line(r).value_text for r in rows] == ["13.8", "85.5"]
+
+
+# --- prescription shorthand common on Indian prescriptions --------------------------------------------
+from ayumitra_ai.nlp.medicines import default_lexicon  # noqa: E402
+from ayumitra_ai.nlp.prescriptions import parse_item  # noqa: E402
+
+
+def test_indian_prescription_shorthand():
+    it = parse_item("Tab Shelcal 500 1 x 2 x 1 mth", 1, None)
+    assert (it.strength, it.frequency, it.duration) == ("500", "1 x 2", "1 mth")
+    assert "confirm" in it.frequency_reading  # "1 x 2" is read, but labelled as needing confirmation
+    it = parse_item("Tab D3 Must 60K 1 tab once/weekly x 4 wks", 1, None)
+    assert (it.strength, it.frequency_reading, it.duration) == ("60K", "once a week", "4 wks")
+    it = parse_item("Tab Neurokind LC 1 tab once daily x 1mth", 1, None)
+    assert it.strength == "" and it.frequency_reading == "once a day"  # "1 tab" is the dose, not a strength
+    it = parse_item("Cap Nexpro RD 40 1 cap once morning empty stomach x 7 days", 1, None)
+    assert (it.frequency_reading, it.timing, it.duration) == ("once a day, in the morning", "empty stomach", "7 days")
+    it = parse_item("Syp Lactihep plus 10 ml once at night x 2 days per week SOS", 1, None)
+    assert it.duration == "2 days per week"
+
+
+def test_missing_frequency_is_never_filled_in():
+    it = parse_item("Tab Telma 40", 1, None)
+    assert it.frequency == "" and it.duration == "" and {"frequency", "duration"} <= set(it.fields_needing_review)
+
+
+def test_indian_brands_are_suggested_not_applied():
+    lx = default_lexicon()
+    m = lx.match("Shelcal 500")
+    assert m.status == "indian_brand" and m.generic_name == "" and m.needs_review
+    assert m.suggestions[0]["generic"].startswith("calcium carbonate")
+    assert lx.match("helcal").status == "suggestion"  # OCR misreading -> suggestion only
+    assert lx.match("Neurokind LC").status == "unrecognized"  # not in the list: never guessed

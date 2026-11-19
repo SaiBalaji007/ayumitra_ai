@@ -25,11 +25,24 @@ FREQUENCY_READING = {
     "od": "once a day", "qd": "once a day", "bd": "twice a day", "bid": "twice a day", "tds": "three times a day",
     "tid": "three times a day", "qid": "four times a day", "hs": "at bedtime", "sos": "only when needed",
     "prn": "only when needed", "stat": "immediately, once", "weekly": "once a week", "daily": "once a day",
+    "once daily": "once a day", "twice daily": "twice a day", "once a day": "once a day", "twice a day": "twice a day",
+    "thrice daily": "three times a day", "once a week": "once a week", "once weekly": "once a week",
+    "once/weekly": "once a week", "once / weekly": "once a week",
+    "once morning": "once a day, in the morning", "once in the morning": "once a day, in the morning",
+    "once evening": "once a day, in the evening", "once in the evening": "once a day, in the evening",
+    "once at night": "once a day, at night",
 }
-_FREQ_TOKEN = re.compile(r"\b(od|qd|bd|bid|tds|tid|qid|hs|sos|prn|stat|weekly|daily|once daily|twice daily)\b", re.I)
+_FREQ_TOKEN = re.compile(r"\b(once\s*/\s*weekly|once (?:a|per) week|once weekly|once (?:a|per) day|twice (?:a|per) day|"
+                         r"once (?:in the )?(?:morning|evening)|once at night|"
+                         r"once daily|twice daily|thrice daily|od|qd|bd|bid|tds|tid|qid|hs|sos|prn|stat|weekly|daily)\b", re.I)
+# "1 x 2" / "1×3": tablets x times a day, as Indian prescriptions commonly write it (not followed by a duration unit).
+_TIMES_PATTERN = re.compile(r"(?<![\d.])([1-4])\s*[x×]\s*([1-4])(?![\d.])(?!\s*(?:days?|d\b|wks?|weeks?|months?|mths?|mnths?))", re.I)
+# A bare number (or "60K") written straight after the name is the strength as written: "Shelcal 500", "D3 Must 60K".
+_BARE_STRENGTH = re.compile(r"^\s*(\d+(?:\.\d+)?\s*[kK]?)(?=\s|$)(?!\s*(?:tabs?|caps?|ml|sachets?|drops?|puffs?|units?|tsp)\b)", re.I)
 _FREQ_PATTERN = re.compile(r"(?<![\d.])([0-4](?:\s*[-–]\s*[0-4]){2,3})(?![\d.])")  # 1-0-1, 1-1-1-1
 _STRENGTH = re.compile(r"(\d+(?:\.\d+)?\s*(?:mg|mcg|µg|g|ml|iu|units?|%)(?:\s*/\s*\d*\s*(?:ml|g))?)\b", re.I)
-_DURATION = re.compile(r"(?:x|for|×)\s*(\d+\s*(?:days?|weeks?|months?|d|wk|wks))\b|\b(\d+\s*(?:days?|weeks?|months?))\b", re.I)
+_DURATION = re.compile(r"(?:x|for|×)\s*(\d+\s*(?:days?|weeks?|months?|mths?|mnths?|d|wks?)(?:\s*(?:per|a|/)\s*(?:week|wk|month))?)\b|"
+                       r"\b(\d+\s*(?:days?|weeks?|months?|mths?|mnths?|wks?)(?:\s*(?:per|a|/)\s*(?:week|wk|month))?)\b", re.I)
 _TIMING = re.compile(r"\b(after (?:food|meals?|breakfast|lunch|dinner)|before (?:food|meals?|breakfast|lunch|dinner)|"
                      r"with (?:food|meals?|milk|water)|empty stomach|at (?:bed ?time|night)|in the (?:morning|evening|night)|"
                      r"ac|pc)\b", re.I)
@@ -62,14 +75,30 @@ class PrescriptionItem:
 
 
 def read_frequency(freq: str) -> str:
-    f = freq.lower().strip()
+    f = re.sub(r"\s+", " ", freq.lower().strip())
     if f in FREQUENCY_READING:
         return FREQUENCY_READING[f]
+    if m := _TIMES_PATTERN.fullmatch(f):
+        return f"commonly means {m.group(1)}, {m.group(2)} times a day (confirm with your doctor or pharmacist)"
     if _FREQ_PATTERN.fullmatch(f.replace(" ", "")):
         parts = [int(p) for p in re.split(r"[-–]", f.replace(" ", ""))]
         slots = ["morning", "afternoon", "night"] if len(parts) == 3 else ["morning", "afternoon", "evening", "night"]
         taken = [f"{n} in the {s}" for n, s in zip(parts, slots, strict=True) if n]
         return ", ".join(taken) if taken else ""
+    return ""
+
+
+def frequency_of(text: str) -> str:
+    """Plain-language reading of a frequency written in free text ("1 cap once morning" -> "once a day, in the
+    morning"); "" if nothing recognisable is written. Used for fields read by the vision model."""
+    if r := read_frequency(text):
+        return r
+    for pattern in (_FREQ_PATTERN, _TIMES_PATTERN, _FREQ_TOKEN):
+        if m := pattern.search(text):
+            token = re.sub(r"\s+", "", m.group(1)) if pattern is _FREQ_PATTERN else \
+                f"{m.group(1)} x {m.group(2)}" if pattern is _TIMES_PATTERN else m.group(1)
+            if r := read_frequency(token):
+                return r
     return ""
 
 
@@ -89,12 +118,18 @@ def parse_item(line: str, line_number: int, lexicon: RxNormLexicon | None, ocr_c
         rest = re.sub(r"^\s*\d+[.)]\s*", "", rest)
     rest = rest.lstrip(" .:-,;")  # OCR noise between the form and the name: "Tab  .Daotun"
 
+    name_end = 0
     if m := _NAME.match(rest):
         item.name_as_written = m.group(1).strip()
+        name_end = m.end()
     if m := _STRENGTH.search(rest):
         item.strength = re.sub(r"\s+", " ", m.group(1)).strip()
+    elif name_end and (m := _BARE_STRENGTH.match(rest[name_end:])) and not _TIMES_PATTERN.match(rest[name_end:].strip()):
+        item.strength = m.group(1).replace(" ", "")
     if m := _FREQ_PATTERN.search(rest):
         item.frequency = re.sub(r"\s+", "", m.group(1))
+    elif m := _TIMES_PATTERN.search(rest):
+        item.frequency = f"{m.group(1)} x {m.group(2)}"
     elif m := _FREQ_TOKEN.search(rest):
         item.frequency = m.group(1)
     item.frequency_reading = read_frequency(item.frequency) if item.frequency else ""

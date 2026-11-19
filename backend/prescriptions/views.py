@@ -35,8 +35,11 @@ class MedicineCorrectionSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         choice = validated_data.pop("choose_suggestion", None)
         if choice:
-            instance.generic_name = choice["name"].lower() if choice.get("kind") == "ingredient" else ""
-            instance.rxnorm_cui = choice["rxcui"]
+            if choice.get("kind") == "indian_brand":  # user confirmed the brand -> its listed generic ingredients
+                instance.generic_name = (choice.get("generic") or "")[:200]
+            else:
+                instance.generic_name = choice["name"].lower() if choice.get("kind") == "ingredient" else ""
+            instance.rxnorm_cui = choice.get("rxcui", "")
         edited = [f for f in EDITABLE if f in validated_data]
         instance = super().update(instance, validated_data)
         if edited:

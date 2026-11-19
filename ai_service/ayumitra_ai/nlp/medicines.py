@@ -133,14 +133,73 @@ class RxNormLexicon:
             ings = self.ingredients_of_brand(rxcui)
             return MedicineMatch(name, "exact_brand", generic_name=" / ".join(ings), rxcui=rxcui, matched_name=canon,
                                  score=1.0, needs_review=not ings)
-        suggestions = []
+        # Indian brands (not in RxNorm): recognised, but the user must confirm before it is used.
+        indian = default_indian_brands()
+        if row := indian.exact(name):
+            sug = indian_brand_suggestion(row, 1.0)
+            return MedicineMatch(name, "indian_brand", matched_name=row["brand"], score=1.0, suggestions=[sug],
+                                 source="AyuMitra list of common Indian brands")
+        suggestions = [indian_brand_suggestion(row, s) for s, row in indian.fuzzy(name)]
         for score, cand in self._fuzzy(key):
             rxcui, canon = self.ingredients.get(cand) or self.brands.get(cand)
             kind = "ingredient" if cand in self.ingredients else "brand"
             suggestions.append({"name": canon, "rxcui": rxcui, "kind": kind, "similarity": round(score, 3)})
         if suggestions:
-            return MedicineMatch(name, "suggestion", score=suggestions[0]["similarity"], suggestions=suggestions)
+            suggestions.sort(key=lambda s: -s["similarity"])
+            return MedicineMatch(name, "suggestion", score=suggestions[0]["similarity"], suggestions=suggestions[:3])
         return MedicineMatch(name, "unrecognized")
+
+
+INDIAN_BRANDS_PATH = Path(__file__).resolve().parent.parent.parent / "knowledge" / "indian_brands.json"
+_STRENGTH_TAIL = re.compile(r"(\s+(\d+(\.\d+)?\s*(k|mg|mcg|g|ml|iu)?|forte|plus|sr|er|xr|od|ds))+$")
+
+
+class IndianBrands:
+    """Common Indian brand names -> generic ingredients (knowledge/indian_brands.json).
+
+    RxNorm is a U.S. database and lacks most Indian brands. A hit here is never applied automatically:
+    it is offered as a suggestion ("Shelcal = calcium carbonate + vitamin D3, please confirm")."""
+
+    def __init__(self, path: Path = INDIAN_BRANDS_PATH):
+        rows = json.loads(path.read_text(encoding="utf-8"))["brands"] if path.exists() else []
+        self.by_key = {_key(r["brand"]): r for r in rows}
+
+    def _candidates(self, key: str) -> list[str]:
+        """'shelcal 500' -> ['shelcal 500', 'shelcal']; 'd3 must 60k' -> [..., 'd3 must']."""
+        out = [key]
+        stripped = _STRENGTH_TAIL.sub("", key).strip()
+        if stripped and stripped != key:
+            out.append(stripped)
+        return out
+
+    def exact(self, name: str) -> dict | None:
+        for cand in self._candidates(_key(name)):
+            if cand in self.by_key:
+                return self.by_key[cand]
+        return None
+
+    def fuzzy(self, name: str, threshold: float = 0.78, limit: int = 2) -> list[tuple[float, dict]]:
+        """Close spellings ('helcal' -> Shelcal), for handwriting/OCR misreads. Suggestions only."""
+        scored = {}
+        for cand in self._candidates(_key(name)):
+            for bkey, row in self.by_key.items():
+                if abs(len(bkey) - len(cand)) > 3:
+                    continue
+                s = SequenceMatcher(None, cand, bkey).ratio()
+                if s >= threshold and s > scored.get(bkey, (0,))[0]:
+                    scored[bkey] = (s, row)
+        return sorted(scored.values(), key=lambda x: -x[0])[:limit]
+
+
+def indian_brand_suggestion(row: dict, similarity: float) -> dict:
+    generic = " + ".join(row["generic"])
+    return {"name": f"{row['brand']} ({generic})", "generic": generic, "rxcui": "", "kind": "indian_brand",
+            "similarity": round(similarity, 3), "source": "AyuMitra list of common Indian brands"}
+
+
+@lru_cache(maxsize=1)
+def default_indian_brands() -> IndianBrands:
+    return IndianBrands()
 
 
 @lru_cache(maxsize=1)

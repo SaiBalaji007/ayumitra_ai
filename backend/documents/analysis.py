@@ -113,6 +113,7 @@ def _store(document: MedicalDocument, result: dict) -> None:
                 frequency=it.get("frequency", "")[:80], timing=it.get("timing", "")[:80],
                 duration=it.get("duration", "")[:60], route=it.get("route", "")[:40],
                 field_confidence={**it.get("field_confidence", {}), "suggestions": med.get("suggestions", []),
-                                  "match_status": med.get("status", ""), "frequency_reading": it.get("frequency_reading", "")},
+                                  "match_status": med.get("status", ""), "frequency_reading": it.get("frequency_reading", ""),
+                                  "read_by": it.get("read_by", "ocr")},
                 overall_confidence=it.get("overall_confidence"), fields_needing_review=it.get("fields_needing_review", []),
             )

@@ -42,19 +42,24 @@ export function MedicineCard({ rx, med }: { rx: Prescription; med: PrescriptionM
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="font-medium">
           Line {med.line_number}
-          {med.generic_name && <span className="ml-2 text-sm font-normal text-muted-foreground">Generic (RxNorm): {med.generic_name}</span>}
+          {med.field_confidence?.read_by === 'vision' && (
+            <Badge variant="outline" className="ml-2 align-middle text-[11px] font-normal">read by AI from handwriting</Badge>
+          )}
+          {med.generic_name && <span className="ml-2 text-sm font-normal text-muted-foreground">
+            Generic{status === 'indian_brand' || (!med.rxnorm_cui && status !== 'exact_ingredient') ? '' : ' (RxNorm)'}: {med.generic_name}</span>}
         </p>
         {med.user_confirmed ? <Badge variant="success"><CheckCircle2 className="size-3" /> Confirmed</Badge>
           : med.fields_needing_review.length ? <Badge variant="warning"><AlertTriangle className="size-3" /> Needs your check</Badge>
           : <Badge variant="outline">Not yet confirmed</Badge>}
       </div>
-      {status === 'suggestion' && !med.generic_name && (
+      {(status === 'suggestion' || status === 'indian_brand') && !med.generic_name && (
         <div className="mb-3 rounded-lg bg-warning/15 p-3 text-xs">
-          AyuMitra couldn't read this medicine name with certainty and will not guess. If one of these RxNorm names matches your
-          prescription, select it; otherwise type the name exactly as written.
+          {status === 'indian_brand'
+            ? 'Recognised as a common Indian brand. Select it to confirm the generic ingredients match your medicine; otherwise type the name exactly as written.'
+            : "AyuMitra couldn't read this medicine name with certainty and will not guess. If one of these names matches your prescription, select it; otherwise type the name exactly as written."}
           <div className="mt-2 flex flex-wrap gap-2">
             {suggestions.map((s) => (
-              <button key={s.rxcui} type="button" onClick={() => setSuggestion(s.name === suggestion ? '' : s.name)}
+              <button key={`${s.kind}-${s.name}`} type="button" onClick={() => setSuggestion(s.name === suggestion ? '' : s.name)}
                 className={cn('cursor-pointer rounded-full border px-2.5 py-1', suggestion === s.name && 'border-primary bg-primary/10 font-medium')}>
                 {s.name}
               </button>

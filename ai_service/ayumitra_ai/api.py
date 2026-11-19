@@ -122,6 +122,82 @@ def lexicon():
     return default_lexicon()
 
 
+def _needs_vision(ex, items: list[dict]) -> bool:
+    """Use the (slower) vision reader only where OCR struggles: handwriting / photos / scans."""
+    if any(p.method == "text_layer" for p in ex.pages):
+        return False  # digital PDF: the text layer is exact
+    conf = min((p.confidence for p in ex.pages if p.confidence is not None), default=0.0)
+    incomplete = sum(1 for it in items if not it.get("frequency") or "name" in it.get("fields_needing_review", []))
+    return not items or conf < 0.9 or incomplete > len(items) / 2
+
+
+def read_prescription_with_vision(data: bytes, content_type: str, ex, ocr_items: list[dict]) -> list[dict] | None:
+    """Medicine lines read by the local vision model, normalised by the same parser and lexicon as OCR text,
+    and cross-checked against the OCR text of the page. Returns None to keep the OCR result."""
+    from .documents import vlm
+    from .nlp.prescriptions import parse_item
+
+    if not vlm.available() or not _needs_vision(ex, ocr_items):
+        return None
+    rows = vlm.read_prescription(data, content_type)
+    if not rows or len(rows) < len(ocr_items):
+        return None
+    from .nlp.prescriptions import FORMS, frequency_of
+
+    page_text = ex.text
+    out = []
+    for n, row in enumerate(rows, 1):
+        item = parse_item(vlm.as_line(row), n, lexicon())
+        # The model already separates the fields: use each one as read (the line re-parse only fills gaps),
+        # so a dose such as "1 x 1" is never mistaken for the frequency "1 cap once morning".
+        item.name_as_written = row["name"]
+        item.dosage_form = FORMS.get(row["form"].lower().rstrip("."), item.dosage_form) if row["form"] else item.dosage_form
+        for f in ("strength", "timing", "duration"):
+            if row[f] and not (f == "timing" and row[f].lower() == "oral"):
+                setattr(item, f, row[f])
+        if row["frequency"]:
+            item.frequency = row["frequency"]
+            item.frequency_reading = frequency_of(row["frequency"])
+        match = lexicon().match(row["name"])
+        item.medicine = match.to_dict()
+        known = match.status.startswith("exact") or match.status == "indian_brand"
+        conf = {"name": 0.9 if known or vlm.support_in_text(row["name"], page_text) >= 0.75 else 0.6}
+        for f in ("strength", "frequency", "timing", "duration"):
+            value = getattr(item, f)
+            if not value:
+                conf[f] = 0.0  # not written (or not read): stays empty, flagged below for the user
+            else:  # read by the model; trusted more when the OCR text of the page also shows it
+                conf[f] = 0.9 if vlm.support_in_text(value, page_text) >= 0.6 else 0.7
+        item.field_confidence = conf
+        item.fields_needing_review = [f for f in ("name", "strength", "frequency", "duration") if conf[f] < 0.85]
+        present = [v for v in conf.values() if v > 0]
+        item.overall_confidence = round(min(present) if present else 0.0, 3)
+        d = item.to_dict()
+        d["read_by"] = "vision"
+        out.append(d)
+    return out
+
+
+def missed_medicine_warnings(ex, items: list[dict]) -> list[str]:
+    """Second opinion from the biomedical NER model on READABLE text (digital PDFs, clear printed pages): warn about
+    medicine names it finds that are not in the list. Garbled handwriting OCR is skipped (the model only produces
+    noise there). Warnings only: nothing is added to the user's medicines."""
+    from .nlp import ner
+
+    if not ner.available():
+        return []
+    readable = [p for p in ex.pages if p.method == "text_layer" or (p.confidence or 0) >= 0.9]
+    text = "\n".join(p.text for p in readable)
+    if not text.strip():
+        return []
+    try:
+        missed = ner.possibly_missed_medicines(text, [it.get("name_as_written", "") for it in items])
+    except Exception:  # the second opinion must never break document processing
+        return []
+    return [f"This page may also mention “{m}”, which is not in the list below. Please check your prescription "
+            f"and add it if it is a medicine." for m in missed[:5]]
+
+
 def analyze_bytes(data: bytes, content_type: str, document_type: str = "") -> dict:
     """OCR/text extraction -> classification -> lab or prescription extraction. No LLM involved.
 
@@ -162,6 +238,13 @@ def analyze_bytes(data: bytes, content_type: str, document_type: str = "") -> di
                 labs.append(d)
         elif kind == "prescription":
             items.extend(i.to_dict() for i in extract_prescription(row_lines, lexicon(), confs))
+    if kind == "prescription":
+        vision = read_prescription_with_vision(data, content_type, ex, items)
+        if vision is not None:
+            items = vision
+            ex.warnings.append("Medicines were read from handwriting by AyuMitra's local vision model. "
+                               "Please check every line against your prescription before confirming it.")
+        ex.warnings.extend(missed_medicine_warnings(ex, items))
     return {
         "extraction": ex.to_dict(),
         "classification": {"document_type": cls.document_type, "confidence": cls.confidence, "scores": cls.scores,

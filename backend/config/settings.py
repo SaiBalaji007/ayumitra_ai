@@ -160,7 +160,7 @@ CELERY_TASK_ROUTES = {
 # AI service (OCR / NLP / RAG / Qwen) runs as a separate process — Django only calls it.
 AI_SERVICE_URL = env("AI_SERVICE_URL", default="http://localhost:8001")
 AI_SERVICE_TOKEN = env("AI_SERVICE_TOKEN", default="")
-AI_SERVICE_OCR_TIMEOUT = env.float("AI_SERVICE_OCR_TIMEOUT", default=300)
+AI_SERVICE_OCR_TIMEOUT = env.float("AI_SERVICE_OCR_TIMEOUT", default=900)  # handwriting is read by a local vision model (≈ 4 min on CPU)
 AI_SERVICE_LLM_TIMEOUT = env.float("AI_SERVICE_LLM_TIMEOUT", default=600)
 
 # How queued document jobs run:

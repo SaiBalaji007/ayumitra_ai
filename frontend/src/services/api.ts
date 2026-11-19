@@ -266,8 +266,10 @@ export type PrescriptionMedicine = {
   route: string
   food_instructions: string
   field_confidence: {
-    suggestions?: { name: string; rxcui: string; kind: string; similarity: number }[]
+    suggestions?: { name: string; rxcui: string; kind: string; similarity: number; generic?: string }[]
     match_status?: string
+    /** 'vision' = read from handwriting by the local vision model; 'ocr' = OCR / text layer */
+    read_by?: string
     frequency_reading?: string
     [k: string]: unknown
   }
@@ -284,6 +286,8 @@ export type Prescription = {
   user_verified: boolean
   verified_at: string | null
   medicines: PrescriptionMedicine[]
+  /** Reading notes from processing, e.g. lines read from handwriting by the local vision model. */
+  notices?: string[]
   created_at: string
   updated_at: string
 }

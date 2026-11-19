@@ -249,6 +249,9 @@ function Results({ rxId }: { rxId: number }) {
       <Section icon={<Pill className="size-4" />} title="Identified medicines"
         description="Check every line against your paper prescription. Fix anything misread, then confirm. Unclear names are never guessed.">
         <div className="space-y-3">
+          {(p.notices ?? []).map((n, i) => (
+            <p key={i} className="rounded-lg bg-warning/15 p-2.5 text-xs">{n}</p>
+          ))}
           {p.medicines.length === 0 && <p className="text-sm text-muted-foreground">No medicine lines were found.</p>}
           {p.medicines.map((m) => <MedicineCard key={m.id} rx={p} med={m} />)}
           <AddMedicine rxId={rxId} />

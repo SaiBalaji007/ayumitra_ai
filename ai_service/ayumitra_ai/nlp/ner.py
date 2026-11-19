@@ -14,8 +14,11 @@ every entity can be traced back to the document.
 
 from __future__ import annotations
 
+import os
+import re
 from dataclasses import asdict, dataclass
 from functools import lru_cache
+from pathlib import Path
 
 DEFAULT_MODEL = "d4data/biomedical-ner-all"
 
@@ -65,7 +68,21 @@ class MedicalNER:
                 out.append(Entity(text=text[start:end], label=label, category=CATEGORY.get(label.lower(), "other"),
                                   start=start, end=end, confidence=round(score, 3)))
             offset += len(piece)
-        return out
+        return _merge_fragments(out, text)
+
+
+def _merge_fragments(ents: list[Entity], text: str) -> list[Entity]:
+    """The tokenizer can split one word into several entities ("Am" + "lo" + "dipine"). Join touching entities of
+    the same category back into the word as written."""
+    merged: list[Entity] = []
+    for e in ents:
+        prev = merged[-1] if merged else None
+        if prev and prev.category == e.category and e.start - prev.end <= 0:
+            merged[-1] = Entity(text=text[prev.start:e.end], label=prev.label, category=prev.category, start=prev.start,
+                                end=e.end, confidence=round(min(prev.confidence, e.confidence), 3))
+        else:
+            merged.append(e)
+    return merged
 
 
 def _windows(text: str, size: int) -> list[str]:
@@ -81,6 +98,35 @@ def _windows(text: str, size: int) -> list[str]:
     return pieces
 
 
+LOCAL_MODEL_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "ner" / "biomedical-ner-all"
+
+
+def available() -> bool:
+    return os.environ.get("AYUMITRA_NER_ENABLED", "true").lower() != "false" and (LOCAL_MODEL_DIR / "model.safetensors").exists()
+
+
 @lru_cache(maxsize=1)
 def default_ner() -> MedicalNER:
-    return MedicalNER()
+    """Loaded from the local copy (offline); falls back to the Hugging Face model id."""
+    return MedicalNER(str(LOCAL_MODEL_DIR) if LOCAL_MODEL_DIR.exists() else DEFAULT_MODEL)
+
+
+def possibly_missed_medicines(text: str, listed_names: list[str], ner: MedicalNER | None = None,
+                              min_confidence: float = 0.8) -> list[str]:
+    """Medicine names the NER model finds in readable text that match none of the listed lines.
+    Used only to WARN the user ("this page may also mention X"); nothing is added to the list automatically."""
+    from difflib import SequenceMatcher
+
+    ner = ner or default_ner()
+    listed = [re.sub(r"[^a-z0-9]+", "", n.lower()) for n in listed_names if n]
+    found = []
+    for e in ner.extract(text, min_confidence=min_confidence):
+        name = e.text.strip(" .,:;()")
+        key = re.sub(r"[^a-z0-9]+", "", name.lower())
+        if e.category != "medication" or len(key) < 4 or not re.search(r"[a-z]{3}", key):
+            continue
+        if any(key in item or item in key or SequenceMatcher(None, key, item).ratio() >= 0.6 for item in listed if item):
+            continue
+        if key not in [re.sub(r"[^a-z0-9]+", "", f.lower()) for f in found]:
+            found.append(name)
+    return found

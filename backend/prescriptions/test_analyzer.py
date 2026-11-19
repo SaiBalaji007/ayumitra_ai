@@ -124,3 +124,30 @@ class AddRemoveMedicineTests(APITestCase):
         self.client.force_authenticate(self.bob)
         self.assertEqual(self.client.post(f"/api/prescriptions/{self.rx.pk}/medicines/", {"name_as_written": "X tab"}, format="json").status_code, 404)
         self.assertEqual(self.client.delete(f"/api/prescriptions/{self.rx.pk}/medicines/{self.wrong.pk}/").status_code, 404)
+
+
+class IndianBrandConfirmationTests(APITestCase):
+    def setUp(self):
+        self.alice = make_user("alice@example.com")
+        self.rx = Prescription.objects.create(document=make_doc(self.alice, "prescription"))
+        sug = {"name": "Shelcal (calcium carbonate + vitamin D3 (cholecalciferol))", "kind": "indian_brand", "rxcui": "",
+               "generic": "calcium carbonate + vitamin D3 (cholecalciferol)", "similarity": 1.0}
+        self.med = PrescriptionMedicine.objects.create(
+            prescription=self.rx, line_number=1, name_as_written="Shelcal", strength="500",
+            field_confidence={"match_status": "indian_brand", "suggestions": [sug]}, fields_needing_review=["name"])
+        self.client.force_authenticate(self.alice)
+
+    def url(self):
+        return f"/api/prescriptions/{self.rx.pk}/medicines/{self.med.pk}/"
+
+    def test_brand_generic_is_used_only_after_the_user_confirms_it(self):
+        self.assertEqual(self.med.generic_name, "")  # recognised, but not applied automatically
+        res = self.client.patch(self.url(), {"choose_suggestion": "Shelcal (calcium carbonate + vitamin D3 (cholecalciferol))",
+                                             "user_confirmed": True}, format="json")
+        self.assertEqual(res.status_code, 200, res.content)
+        self.med.refresh_from_db()
+        self.assertEqual((self.med.generic_name, self.med.rxnorm_cui), ("calcium carbonate + vitamin D3 (cholecalciferol)", ""))
+
+    def test_only_offered_suggestions_can_be_chosen(self):
+        res = self.client.patch(self.url(), {"choose_suggestion": "Dolo (paracetamol)"}, format="json")
+        self.assertEqual(res.status_code, 400)

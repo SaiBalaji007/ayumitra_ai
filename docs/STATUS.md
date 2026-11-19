@@ -14,6 +14,19 @@ evaluation results (see "Evaluation" below). Pretrained models only, no fine-tun
 
 _Last updated: 2026-11-18: report reading for more layouts, typical reference ranges, offline mode and map fallback (see "Updates 2026-11-18")._
 
+## Updates 2026-11-19: Prescription reading
+
+| Change | Status | Evidence |
+|---|---|---|
+| Local vision model for handwriting: Qwen2.5-VL-3B-Instruct (Q4_K_M GGUF + Q8 projector, llama.cpp `llama-mtmd-cli`, Qwen Research Licence), used only when OCR is weak; fields used as read, normalised by the same parser; every field cross-checked against the OCR text, short values never trusted; missing fields never filled in | ✅ Tested | `tests/test_vision_reader.py`; real handwritten sample: 0/5 medicines with OCR only → 5/5 lines found, frequency as written on 4/5, duration on 5/5; uncertain fields flagged; ≈ 4.5 min end to end on CPU |
+| Indian brand list (`knowledge/indian_brands.json`, ~90 brands → generic ingredients), shown as "recognised, please confirm"; generic used only after the user confirms | ✅ Tested | `tests/test_lab_layouts.py`, `prescriptions/test_analyzer.py::IndianBrandConfirmationTests` |
+| Shorthand: "1 x 2", once/weekly, once morning, × 1 mth, 2 days per week, strength without unit (500, 60K) | ✅ Tested | `tests/test_lab_layouts.py` |
+| Biomedical NER (d4data/biomedical-ner-all, Apache-2.0, local copy in `data/ner/`) as a second opinion on readable text: warns about medicines not in the list; skipped on garbled handwriting | ✅ Tested | Fake-model unit tests; real model: 0 false warnings on 12 synthetic prescriptions |
+| Prescription page shows processing notices and a "read by AI from handwriting" badge | ✅ Type-checked | Frontend tests pass |
+| Backend document-analysis timeout raised to 900 s for vision reading | ✅ | Backend 133 tests pass |
+
+Tests: AI service 206, backend 133, frontend 12, all passing. Model files (`ai_service/models/*.gguf`, `ai_service/data/ner/`) are not in git; see SETUP notes.
+
 ## Updates 2026-11-18
 
 All tests pass: backend 131, AI service 192, frontend 12. Synthetic evaluation set: extraction unchanged (0 documents differ).

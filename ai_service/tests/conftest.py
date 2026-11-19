@@ -6,8 +6,14 @@ can never be mistaken for medical information. Models are deterministic offline 
 from __future__ import annotations
 
 import json
+import os
 
 import pytest
+
+# The local vision model takes minutes per image on CPU; unit tests exercise the OCR path. The vision reader
+# has its own tests that don't need the model (tests/test_vision_reader.py).
+os.environ.setdefault("AYUMITRA_VISION_ENABLED", "false")
+os.environ.setdefault("AYUMITRA_NER_ENABLED", "false")  # NER helper is tested with a fake model (test_vision_reader.py)
 
 from ayumitra_ai.config import Settings
 from ayumitra_ai.ingestion.pipeline import Ingestor
